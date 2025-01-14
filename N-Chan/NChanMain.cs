@@ -33,11 +33,11 @@ public class NChanMain
         Console.WriteLine("REGISTERING COMMANDS...");
         InteractionService service = new InteractionService(client.Rest);
         Console.WriteLine("ADDING MODULE...");
-        await service.AddModulesAsync(typeof(NChanCommands).Assembly, null);
+        await service.AddModuleAsync<NChanCommands>(null);
         Console.WriteLine("MODULE ADDED!");
         client.InteractionCreated += async (interaction) =>
         {
-            SocketInteractionContext ctx = new SocketInteractionContext(client, interaction);
+            SocketInteractionContext<SocketInteraction> ctx = new SocketInteractionContext<SocketInteraction>(client, interaction);
             await service.ExecuteCommandAsync(ctx, null);
         };
         Console.WriteLine("STARTING REGISTRY...");
