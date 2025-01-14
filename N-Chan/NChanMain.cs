@@ -6,6 +6,9 @@ using Discord.WebSocket;
 
 public class NChanMain
 {
+    /*
+        Set up and start the actual N-Chan bot and keep it running indefinitely.
+    */
     public static async Task StartBot(){
         //Create the DiscordSocketClient and hook our logging method to the log event
         DiscordSocketClient client = new DiscordSocketClient();
@@ -23,6 +26,9 @@ public class NChanMain
         await Task.Delay(-1);
     }
 
+    /*
+        Initialize all commands. Incomplete for now.
+    */
     private static async Task InitCommands(DiscordSocketClient client){
         Console.WriteLine("REGISTERING COMMANDS...");
         InteractionService service = new InteractionService(client.Rest);

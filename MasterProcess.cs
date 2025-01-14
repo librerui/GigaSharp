@@ -2,6 +2,9 @@ namespace GigaSharp;
 
 public class MasterProcess
 {
+    /*
+        This does little more than kick off the start of all other bots and also keep the ping loop runing forever.
+    */
     public static async Task StartBots(){
 
         //Start as many bots as you wish, one after the other.

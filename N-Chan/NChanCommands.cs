@@ -2,7 +2,7 @@ namespace GigaSharp;
 
 using Discord.Interactions;
 
-public class NChanCommands : InteractionModuleBase
+public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
 {
     [SlashCommand("echo-ping", "Receive a pong, followed by an echo of the input")]
     public async Task EchoPing(string input){

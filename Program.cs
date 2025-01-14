@@ -4,6 +4,10 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        // Hey reader (which is probably taiko)
+        // You're probably looking for the MasterProcess class, not this.
+        // Don't mess with this function unless you're really sure of it.
+
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
@@ -30,8 +34,12 @@ public class Program
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
 
+        //This is the line that actually matters!!!
+        //Go see the MasterProcess to see what it does.
         _ = MasterProcess.StartBots();
 
+        //WARNING: THIS LINE BLOCKS THE THREAD UNTIL SHUTDOWN
+        //DO NOT PLACE CODE AFTER THIS LINE
         app.Run();
     }
 }
