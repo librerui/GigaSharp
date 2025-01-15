@@ -8,4 +8,14 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
     public async Task EchoPing(string input){
         await RespondAsync("Pong! "+input);
     }
+
+    [SlashCommand("book", "Get information about a particular book!")]
+    public async Task Book(int id){
+        Book book = WebScraping.GetBookFromWeb(id);
+        if(book != null){
+            await RespondAsync("BOOK RECEIVED!!!\nName: "+book.Name);
+        }else{
+            await RespondAsync("Something went wrong retrieving that book's information!");
+        }
+    }
 }

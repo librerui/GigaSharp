@@ -7,7 +7,7 @@ using Discord.WebSocket;
 
 public class NChanMain
 {
-    private static IServiceProvider? services;
+    private static IServiceProvider services;
     /*
         Set up and start the actual N-Chan bot and keep it running indefinitely.
     */
