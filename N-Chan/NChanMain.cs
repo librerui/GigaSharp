@@ -50,7 +50,7 @@ public class NChanMain
         Console.WriteLine("MODULE ADDED!");
         client.InteractionCreated += async (interaction) =>
         {
-            SocketInteractionContext<SocketInteraction> ctx = new SocketInteractionContext<SocketInteraction>(client, interaction);
+            SocketInteractionContext ctx = new SocketInteractionContext(client, interaction);
             await service.ExecuteCommandAsync(ctx, services);
         };
     }
