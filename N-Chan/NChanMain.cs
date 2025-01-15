@@ -21,9 +21,8 @@ public class NChanMain
         client.Log += Log;
         services.GetRequiredService<InteractionService>().Log += Log;
 
-        //Perform the login (currently logging into the test bot, not nchan)
-        //await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("NCHAN_TOKEN"));
-        await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("TEST_TOKEN"));
+        //Perform the login
+        await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("NCHAN_TOKEN"));
         await client.StartAsync();
 
         //Create interaction framework, load interaction module handler, and hook intraction processing to interaction event
@@ -60,7 +59,8 @@ public class NChanMain
             throw new Exception("Services undefined upon attempting to register n-chan commands");
         }
         Console.WriteLine("STARTING REGISTRY...");
-        await services.GetRequiredService<InteractionService>().RegisterCommandsToGuildAsync(1181165855522959420);
+        //Registering to n-chan test server
+        await services.GetRequiredService<InteractionService>().RegisterCommandsToGuildAsync(990317819059118100);
         Console.WriteLine("COMMANDS REGISTERED!");
     }
 
