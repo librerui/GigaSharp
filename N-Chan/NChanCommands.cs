@@ -13,9 +13,12 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
     public async Task Book(int id){
         Book book = WebScraping.GetBookFromWeb(id);
         if(book != null){
-            await RespondAsync("BOOK RECEIVED!!!\nName: "+book.Name);
+            await RespondAsync("BOOK RECEIVED!!!\nName: "+book.Name+
+            "\nFirst tag: "+book.Tags[0]+"\nLast tag: "+book.Tags[book.Tags.Length-1]+
+            "\nFirst character: "+book.Characters[0]+"\nLast character: "+book.Characters[book.Characters.Length-1]+
+            "\nPages: "+book.Pages+"\nParody: "+book.Parody[0]);
         }else{
-            await RespondAsync("Something went wrong retrieving that book's information!");
+            await RespondAsync("I'm sowwy! I couldn't find that book, master :()");
         }
     }
 }
