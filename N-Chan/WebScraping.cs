@@ -16,7 +16,7 @@ public class WebScraping{
                 .AddCover(doc.DocumentNode.SelectSingleNode("//div[@class=\"cover\"]/a/img").Attributes["data-src"].Value);
             Console.WriteLine("Name: "+infoBlock.Element("h1").InnerText);
             
-            HtmlNodeCollection infoBlockCategories = infoBlock.SelectNodes("li/span");
+            HtmlNodeCollection infoBlockCategories = infoBlock.SelectNodes("//li/span");
             foreach(HtmlNode node in infoBlockCategories){
                 Console.WriteLine("Processing category "+node.InnerText);
                 string[] elements = new string[node.ParentNode.ChildNodes.Count-1];
