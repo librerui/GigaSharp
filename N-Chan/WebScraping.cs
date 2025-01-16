@@ -41,8 +41,9 @@ public class WebScraping{
             builder.AddPages(int.Parse(infoBlock.SelectSingleNode("//span[@class=\"tag_name pages\"]").InnerText));
 
             return builder.Build();
-        }catch{
-            Console.WriteLine("Exception thrown somewhere.");
+        }catch(Exception e){
+            Console.WriteLine("Exception thrown somewhere: "+e.Message);
+            Console.WriteLine(e.StackTrace);
             return null;
         }
     }
