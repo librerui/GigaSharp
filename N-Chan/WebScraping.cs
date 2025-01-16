@@ -6,6 +6,7 @@ public class WebScraping{
     public static Book GetBookFromWeb(int id){
         HtmlDocument doc = new HtmlWeb().Load("https://nhentai.xxx/g/"+id);
         if(doc == null) { return null; }
+        if(CheckIf404(doc)) { return null; }
 
         HtmlNode infoBlock = doc.DocumentNode.SelectSingleNode("//div[@class=\"info\"]");
         Book.BookBuilder builder = new Book.BookBuilder().AddId(id)
@@ -16,7 +17,7 @@ public class WebScraping{
         HtmlNodeCollection infoBlockCategories = infoBlock.SelectNodes("//li[position()<last()-1]/span");
         foreach(HtmlNode node in infoBlockCategories){
             string[] elements = new string[node.ParentNode.ChildNodes.Count-1];
-            fillInfoBlockArray(elements, node);
+            FillInfoBlockArray(elements, node);
             switch (node.InnerText){
                 case "Parodies:": builder.AddParody(elements);
                     break;
@@ -39,7 +40,7 @@ public class WebScraping{
         return builder.Build();
     }
 
-    private static void fillInfoBlockArray(string[] infoBlockCategory, HtmlNode htmlReference){
+    private static void FillInfoBlockArray(string[] infoBlockCategory, HtmlNode htmlReference){
         htmlReference = htmlReference.NextSibling;
         int i = 0;
         for(i = 0; htmlReference!=null && i < infoBlockCategory.Length; i++){
@@ -56,5 +57,14 @@ public class WebScraping{
         if(htmlReference != null || i < infoBlockCategory.Length){
             throw new Exception("Error on filling an info block array! Index at "+i+" and htmlreference null: "+(htmlReference==null));
         }
+    }
+
+    public static bool DoesBookExist(int id){
+        HtmlDocument doc = new HtmlWeb().Load("https://nhentai.xxx/g/"+id);
+        return !CheckIf404(doc);
+    }
+
+    private static bool CheckIf404(HtmlDocument doc){
+        return doc.DocumentNode.SelectSingleNode("//h1").InnerText == "404 - Not Found";
     }
 }

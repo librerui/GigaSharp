@@ -1,3 +1,4 @@
+using Discord;
 using HtmlAgilityPack;
 
 namespace GigaSharp;
@@ -15,6 +16,19 @@ public class Book {
     public string[] Characters{get;private set;}
     public string[] Categories{get;private set;}
     public HtmlDocument Doc{get;private set;}
+
+    public Embed CreateEmbed(){
+        EmbedBuilder builder = new EmbedBuilder()
+            .WithTitle(Name)
+            .WithDescription("Read me at: https://nhentai.xxx/g/"+Id)
+            .WithColor(Color.Purple)
+            .WithImageUrl(Cover)
+            .AddField("Parody of:", string.Join("\n", Parody))
+            .AddField("Tags:", string.Join("\n", Tags))
+            .AddField("Language:", string.Join("\n", Languages));
+        
+        return builder.Build();
+    }
 
     public class BookBuilder{
         Book b = new Book();
