@@ -51,9 +51,10 @@ public class WebScraping{
     private static void fillInfoBlockArray(string[] infoBlockCategory, HtmlNode htmlReference){
         htmlReference = htmlReference.NextSibling;
         int i = 0;
+        Console.WriteLine("NextSibling of span is "+htmlReference.OuterHtml);
         Console.WriteLine("Attempting to fill array...");
         for(i = 0; htmlReference!=null && i < infoBlockCategory.Length; i++){
-            HtmlNode name = htmlReference.SelectSingleNode("/span[@class=\"tag_name\"]");
+            HtmlNode name = htmlReference.SelectSingleNode("span[@class=\"tag_name\"]");
             /*IEnumerable<HtmlNode> discard = name.ChildNodes.Where(x => x.NodeType == HtmlNodeType.Element);
             foreach(HtmlNode child in discard){
                 name.RemoveChild(child);
