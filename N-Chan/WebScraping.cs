@@ -16,7 +16,7 @@ public class WebScraping{
                 .AddCover(doc.DocumentNode.SelectSingleNode("//div[@class=\"cover\"]/a/img").Attributes["data-src"].Value);
             Console.WriteLine("Name: "+infoBlock.Element("h1").InnerText);
             
-            HtmlNodeCollection infoBlockCategories = infoBlock.SelectNodes("//li/span");
+            HtmlNodeCollection infoBlockCategories = infoBlock.SelectNodes("//li/span[last()-2]");
             foreach(HtmlNode node in infoBlockCategories){
                 Console.WriteLine("Processing category "+node.InnerText);
                 string[] elements = new string[node.ParentNode.ChildNodes.Count-1];
@@ -65,8 +65,7 @@ public class WebScraping{
         }
         Console.WriteLine("Array filled.");
         if(htmlReference != null || i < infoBlockCategory.Length){
-            Console.WriteLine("Index at "+i+" and htmlreference null: "+(htmlReference==null));
-            //throw new Exception("Something has gone wrong.");
+            throw new Exception("Error on filling an info block array! Index at "+i+" and htmlreference null: "+(htmlReference==null));
         }
     }
 }
