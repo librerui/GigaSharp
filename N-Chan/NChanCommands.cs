@@ -16,8 +16,7 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
             if(book != null){
                 await RespondAsync("BOOK RECEIVED!!!\nName: "+book.Name+
                 "\nFirst tag: "+book.Tags[0]+"\nLast tag: "+book.Tags[book.Tags.Length-1]+
-                "\nFirst character: "+book.Characters[0]+"\nLast character: "+book.Characters[book.Characters.Length-1]+
-                "\nPages: "+book.Pages+"\nParody: "+book.Parody[0]);
+                "\nPages: "+book.Pages+"\nParody: "+book.Parody[0]+"\nCover: "+book.Cover);
             }else{
                 await RespondAsync("I'm sowwy! I couldn't find that book, master :(");
             }
