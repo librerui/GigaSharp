@@ -46,8 +46,10 @@ public class WebScraping{
         for(i = 0; htmlReference!=null && i < infoBlockCategory.Length; i++){
             HtmlNode name = htmlReference.SelectSingleNode("span[@class=\"tag_name\"]");
             HtmlNodeCollection discard = name.SelectNodes("span");
-            foreach(HtmlNode child in discard){
-                name.RemoveChild(child);
+            if(discard != null){
+                foreach(HtmlNode child in discard){
+                    name.RemoveChild(child);
+                }
             }
             infoBlockCategory[i] = name.InnerText;
             htmlReference = htmlReference.NextSibling;
