@@ -18,7 +18,7 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
             "\nFirst character: "+book.Characters[0]+"\nLast character: "+book.Characters[book.Characters.Length-1]+
             "\nPages: "+book.Pages+"\nParody: "+book.Parody[0]);
         }else{
-            await RespondAsync("I'm sowwy! I couldn't find that book, master :()");
+            await RespondAsync("I'm sowwy! I couldn't find that book, master :(");
         }
     }
 }

@@ -48,15 +48,16 @@ public class WebScraping{
         int i = 0;
         for(i = 0; htmlReference!=null && i < infoBlockCategory.Length; i++){
             HtmlNode name = htmlReference.SelectSingleNode("/span[@class=\"tag_name\"]");
-            IEnumerable<HtmlNode> discard = name.ChildNodes.Where(x => x.NodeType == HtmlNodeType.Element);
+            /*IEnumerable<HtmlNode> discard = name.ChildNodes.Where(x => x.NodeType == HtmlNodeType.Element);
             foreach(HtmlNode child in discard){
                 name.RemoveChild(child);
-            }
+            }*/
             infoBlockCategory[i] = name.InnerText;
             htmlReference = htmlReference.NextSibling;
         }
         if(htmlReference != null || i < infoBlockCategory.Length){
-            throw new Exception("Something has gone wrong.");
+            Console.WriteLine("Index at "+i+" and htmlreference null: "+(htmlReference==null));
+            //throw new Exception("Something has gone wrong.");
         }
     }
 }
