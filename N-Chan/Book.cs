@@ -24,29 +24,35 @@ public class Book {
             .WithColor(Color.Purple)
             .WithImageUrl(Cover);
 
-        //builder.AddField("Book content information:", "_ _");
-        if(Tags != null && Tags.Length > 0){
-            builder.AddField("Tags:", string.Join("\n", Tags), true);
-        }
+        string firstColumn = "";
         if(Parody != null && Parody.Length > 0){
-            builder.AddField("Parody of:", string.Join("\n", Parody), true);
+            firstColumn += "**Parody of:**\n"+string.Join("\n", Parody)+"\n";
         }
         if(Characters != null && Characters.Length > 0){
-            builder.AddField("Starring:", string.Join("\n", Characters), true);
+            firstColumn += "**Starring:**\n"+string.Join("\n", Characters);
         }
-        builder.AddField(/*"Credit and misc information:"*/"_ _", "_ _");
+        builder.AddField("Content information:", (firstColumn != "") ? firstColumn : "_ _", true);
+
+        if(Tags != null && Tags.Length > 0){
+            builder.AddField("Tags:", string.Join("\n", Tags), true);
+        }else{
+            builder.AddField("Tags:", string.Join("_ _", Tags), true);
+        }
+
+        string thirdColumn = "";
         if(Artists != null && Artists.Length > 0){
-            builder.AddField("Artists:", string.Join("\n", Artists), true);
+            thirdColumn += "**Artists:**\n"+string.Join("\n", Artists)+"\n";
         }
         if(Groups != null && Groups.Length > 0){
-            builder.AddField("Groups:", string.Join("\n", Groups), true);
+            thirdColumn += "**Groups:**\n"+string.Join("\n", Groups)+"\n";
         }
         if(Languages != null && Languages.Length > 0){
-            builder.AddField("Languages:", string.Join("\n", Languages), true);
+            thirdColumn += "**Languages:**\n"+string.Join("\n", Languages)+"\n";
         }
         if(Categories != null && Categories.Length > 0){
-            builder.AddField("Categories:", string.Join("\n", Categories), true);
+            thirdColumn += "**Categories:**\n"+string.Join("\n", Categories);
         }
+        builder.AddField("Credit and misc information:", (thirdColumn != "") ? thirdColumn : "_ _", true);
         
         return builder.Build();
     }
