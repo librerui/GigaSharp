@@ -24,17 +24,17 @@ public class Book {
             .WithColor(Color.Purple)
             .WithImageUrl(Cover);
 
-        builder.AddField("Book content information:", "What kind of stuff you can expect to see if you read this");
+        builder.AddField("Book content information:", "****");
+        if(Tags != null && Tags.Length > 0){
+            builder.AddField("Tags:", string.Join("\n", Tags), true);
+        }
         if(Parody != null && Parody.Length > 0){
             builder.AddField("Parody of:", string.Join("\n", Parody), true);
         }
         if(Characters != null && Characters.Length > 0){
             builder.AddField("Starring:", string.Join("\n", Characters), true);
         }
-        if(Tags != null && Tags.Length > 0){
-            builder.AddField("Tags:", string.Join("\n", Tags), true);
-        }
-        builder.AddField("Credit and misc information:", "Information about the authors and some more things about the book");
+        builder.AddField("Credit and misc information:", "****");
         if(Artists != null && Artists.Length > 0){
             builder.AddField("Artists:", string.Join("\n", Artists), true);
         }

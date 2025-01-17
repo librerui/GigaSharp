@@ -30,8 +30,9 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
     public async Task Exists(string id){
         try{
             int realId = int.Parse(id);
-            if(WebScraping.DoesBookExist(realId)){
-                await RespondAsync("Master! That book exists :3");
+            Book book = WebScraping.GetBookFromWeb(realId);
+            if(book != null){
+                await RespondAsync("Master! That book exists :3\nIt's called: "+book.Name);
             }else{
                 await RespondAsync("Master! That book doesn't exist 3:");
             }

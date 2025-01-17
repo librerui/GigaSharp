@@ -66,6 +66,6 @@ public class WebScraping{
     }
 
     private static bool CheckIf404(HtmlDocument doc){
-        return doc.DocumentNode.SelectSingleNode("//h1").InnerText.Equals("404 - Not Found");
+        return doc.DocumentNode.SelectSingleNode("//div[@class=\"content_box\"]") != null;
     }
 }
