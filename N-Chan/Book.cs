@@ -22,31 +22,30 @@ public class Book {
             .WithTitle(Name)
             .WithDescription("Read me at: https://nhentai.xxx/g/"+Id+"\nPages: "+Pages)
             .WithColor(Color.Purple)
-            .WithImageUrl(Cover)
-            .AddField("Parody of:", string.Join("\n", Parody))
-            .AddField("Tags:", string.Join("\n", Tags), true)
-            .AddField("Language:", string.Join("\n", Languages), true);
+            .WithImageUrl(Cover);
 
+        builder.AddField("Book content information:", "");
         if(Parody != null && Parody.Length > 0){
-            builder.AddField("Parody of:", string.Join("\n", Parody));
+            builder.AddField("Parody of:", string.Join("\n", Parody), true);
         }
         if(Characters != null && Characters.Length > 0){
-            builder.AddField("Starring:", string.Join("\n", Characters));
+            builder.AddField("Starring:", string.Join("\n", Characters), true);
         }
         if(Tags != null && Tags.Length > 0){
             builder.AddField("Tags:", string.Join("\n", Tags), true);
         }
+        builder.AddField("Credit and misc information:", "");
         if(Artists != null && Artists.Length > 0){
-            builder.AddField("Artists:", string.Join("\n", Artists));
+            builder.AddField("Artists:", string.Join("\n", Artists), true);
         }
         if(Groups != null && Groups.Length > 0){
-            builder.AddField("Groups:", string.Join("\n", Groups));
+            builder.AddField("Groups:", string.Join("\n", Groups), true);
         }
         if(Languages != null && Languages.Length > 0){
-            builder.AddField("Languages:", string.Join("\n", Languages));
+            builder.AddField("Languages:", string.Join("\n", Languages), true);
         }
         if(Categories != null && Categories.Length > 0){
-            builder.AddField("Categories:", string.Join("\n", Categories));
+            builder.AddField("Categories:", string.Join("\n", Categories), true);
         }
         
         return builder.Build();
