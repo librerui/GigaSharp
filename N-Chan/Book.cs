@@ -24,7 +24,7 @@ public class Book {
             .WithColor(Color.Purple)
             .WithImageUrl(Cover);
 
-        builder.AddField("Book content information:", "");
+        builder.AddField("Book content information:", "What kind of stuff you can expect to see if you read this");
         if(Parody != null && Parody.Length > 0){
             builder.AddField("Parody of:", string.Join("\n", Parody), true);
         }
@@ -34,7 +34,7 @@ public class Book {
         if(Tags != null && Tags.Length > 0){
             builder.AddField("Tags:", string.Join("\n", Tags), true);
         }
-        builder.AddField("Credit and misc information:", "");
+        builder.AddField("Credit and misc information:", "Information about the authors and some more things about the book");
         if(Artists != null && Artists.Length > 0){
             builder.AddField("Artists:", string.Join("\n", Artists), true);
         }
