@@ -51,6 +51,7 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
                 Book book = WebScraping.GetBookFromWeb(id);
                 if(book != null){
                     await RespondAsync(embed: book.CreateEmbed());
+                    break;
                 }
             }
         }catch(Exception e){

@@ -16,6 +16,7 @@ public class Book {
     public string[] Characters{get;private set;}
     public string[] Categories{get;private set;}
     public HtmlDocument Doc{get;private set;}
+    public string FirstPage{get;private set;}
 
     public Embed CreateEmbed(){
         EmbedBuilder builder = new EmbedBuilder()
@@ -54,6 +55,7 @@ public class Book {
         }
         builder.AddField("Credit and misc information:", (thirdColumn != "") ? thirdColumn : "_ _", true);
         
+        Console.WriteLine(FirstPage);
         return builder.Build();
     }
 
@@ -72,5 +74,6 @@ public class Book {
         public BookBuilder AddCharacters(string[] characters) { b.Characters = characters; return this; }
         public BookBuilder AddCategories(string[] categories) { b.Categories = categories; return this; }
         public BookBuilder AddDoc(HtmlDocument doc) { b.Doc = doc; return this; }
+        public BookBuilder AddFirstPage(string firstPage) { b.FirstPage = firstPage; return this; }
     }
 }
