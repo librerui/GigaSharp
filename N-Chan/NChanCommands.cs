@@ -4,9 +4,19 @@ using Discord.Interactions;
 
 public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
 {
-    [SlashCommand("echo-ping", "Receive a pong, followed by an echo of the input")]
-    public async Task EchoPing(string input){
-        await RespondAsync("Pong! "+input);
+    [SlashCommand("ping", "Get a pong!")]
+    public async Task Ping(){
+        await RespondAsync("Pong! :ping_pong:");
+    }
+
+    [SlashCommand("ping-nhentai", "Ping nhentai.xxx to see if the website is down!")]
+    public async Task PingNHentai(){
+        bool result = await WebScraping.Ping();
+        if(result){
+            await RespondAsync("Master! I think nhentai is up :3");
+        }else{
+            await RespondAsync("Master! I think nhentai is down 3:");
+        }
     }
 
     [SlashCommand("book", "Get information about a particular book! Identify it using its nhentai ID!")]

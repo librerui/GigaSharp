@@ -3,6 +3,17 @@ using HtmlAgilityPack;
 namespace GigaSharp;
 
 public class WebScraping{
+    public async static Task<bool> Ping(){
+        try{
+            HttpClient nhentaiClient = new HttpClient(){
+                BaseAddress = new Uri("https://nhentai.xxx/")
+            };
+            HttpResponseMessage response = await nhentaiClient.GetAsync("home");
+            return response.IsSuccessStatusCode;
+        }catch{
+            return false;
+        }
+    }
     public static Book GetBookFromWeb(int id){
         HtmlDocument doc = new HtmlWeb().Load("https://nhentai.xxx/g/"+id);
         if(doc == null) { return null; }

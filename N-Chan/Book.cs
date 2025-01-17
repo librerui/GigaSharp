@@ -30,7 +30,13 @@ public class Book {
             firstColumn += "**Parody of:**\n"+string.Join("\n", Parody)+"\n";
         }
         if(Characters != null && Characters.Length > 0){
-            firstColumn += "**Starring:**\n"+string.Join("\n", Characters);
+            firstColumn += "**Starring:**\n"+string.Join("\n", Characters)+"\n";
+        }
+        if(Languages != null && Languages.Length > 0){
+            firstColumn += "**Languages:**\n"+string.Join("\n", Languages)+"\n";
+        }
+        if(Categories != null && Categories.Length > 0){
+            firstColumn += "**Categories:**\n"+string.Join("\n", Categories);
         }
         builder.AddField("Content information:", (firstColumn != "") ? firstColumn : "_ _", true);
 
@@ -47,15 +53,8 @@ public class Book {
         if(Groups != null && Groups.Length > 0){
             thirdColumn += "**Groups:**\n"+string.Join("\n", Groups)+"\n";
         }
-        if(Languages != null && Languages.Length > 0){
-            thirdColumn += "**Languages:**\n"+string.Join("\n", Languages)+"\n";
-        }
-        if(Categories != null && Categories.Length > 0){
-            thirdColumn += "**Categories:**\n"+string.Join("\n", Categories);
-        }
-        builder.AddField("Credit and misc information:", (thirdColumn != "") ? thirdColumn : "_ _", true);
+        builder.AddField("Credit to:", (thirdColumn != "") ? thirdColumn : "_ _", true);
         
-        Console.WriteLine(FirstPage);
         return builder.Build();
     }
 
