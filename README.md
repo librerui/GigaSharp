@@ -11,3 +11,7 @@ This readme may later be updated with deeper information about each bot's use an
 * **2025-01-12: Version 0.1, commit 50ef898**
 
 First stable progress release of the project. Capable of logging into a bot and has a functional 5-minute pinging loop to keep the application running indefinitely on Render. Also contains non-functional progress on a slash command system.
+
+* **2025-01-17: Version 0.2, commit d14b574**
+
+Most basic n-chan functionalities complete: Fully functional web scraping all necessary book data from nhentai, functional 404 detection system, functional slash command interface, functional book discord message embed creation, and ping bot, ping nhentai, book, random, and exists commands added.
