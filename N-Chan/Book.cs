@@ -24,7 +24,7 @@ public class Book {
             .WithColor(Color.Purple)
             .WithImageUrl(Cover);
 
-        builder.AddField("Book content information:", "****");
+        //builder.AddField("Book content information:", "_ _");
         if(Tags != null && Tags.Length > 0){
             builder.AddField("Tags:", string.Join("\n", Tags), true);
         }
@@ -34,7 +34,7 @@ public class Book {
         if(Characters != null && Characters.Length > 0){
             builder.AddField("Starring:", string.Join("\n", Characters), true);
         }
-        builder.AddField("Credit and misc information:", "****");
+        builder.AddField(/*"Credit and misc information:"*/"_ _", "_ _");
         if(Artists != null && Artists.Length > 0){
             builder.AddField("Artists:", string.Join("\n", Artists), true);
         }

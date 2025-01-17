@@ -59,11 +59,11 @@ public class WebScraping{
         }
     }
 
-    public static bool DoesBookExist(int id){
+    //Unused
+    /*public static bool DoesBookExist(int id){
         HtmlDocument doc = new HtmlWeb().Load("https://nhentai.xxx/g/"+id);
-        Console.WriteLine(doc.DocumentNode.SelectSingleNode("//h1").InnerText);
         return !CheckIf404(doc);
-    }
+    }*/
 
     private static bool CheckIf404(HtmlDocument doc){
         return doc.DocumentNode.SelectSingleNode("//div[@class=\"content_box\"]") != null;
