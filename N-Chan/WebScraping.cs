@@ -7,8 +7,8 @@ public class WebScraping{
         HtmlDocument doc = new HtmlWeb().Load("https://nhentai.xxx/g/"+id);
         if(doc == null) { return null; }
         if(CheckIf404(doc)) { return null; }
-        HtmlDocument firstPage = new HtmlWeb().Load("https://nhentai.xxx/g/"+id+"/1");
-        if(firstPage != null) { return null; }
+        HtmlDocument firstPage = new HtmlWeb().Load("https://nhentai.xxx/g/"+id+@"/1");
+        if(firstPage == null) { return null; }
 
         HtmlNode infoBlock = doc.DocumentNode.SelectSingleNode("//div[@class=\"info\"]");
         Book.BookBuilder builder = new Book.BookBuilder().AddId(id)
