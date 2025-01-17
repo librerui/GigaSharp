@@ -20,12 +20,34 @@ public class Book {
     public Embed CreateEmbed(){
         EmbedBuilder builder = new EmbedBuilder()
             .WithTitle(Name)
-            .WithDescription("Read me at: https://nhentai.xxx/g/"+Id)
+            .WithDescription("Read me at: https://nhentai.xxx/g/"+Id+"\nPages: "+Pages)
             .WithColor(Color.Purple)
             .WithImageUrl(Cover)
             .AddField("Parody of:", string.Join("\n", Parody))
-            .AddField("Tags:", string.Join("\n", Tags))
-            .AddField("Language:", string.Join("\n", Languages));
+            .AddField("Tags:", string.Join("\n", Tags), true)
+            .AddField("Language:", string.Join("\n", Languages), true);
+
+        if(Parody != null && Parody.Length > 0){
+            builder.AddField("Parody of:", string.Join("\n", Parody));
+        }
+        if(Characters != null && Characters.Length > 0){
+            builder.AddField("Starring:", string.Join("\n", Characters));
+        }
+        if(Tags != null && Tags.Length > 0){
+            builder.AddField("Tags:", string.Join("\n", Tags), true);
+        }
+        if(Artists != null && Artists.Length > 0){
+            builder.AddField("Artists:", string.Join("\n", Artists));
+        }
+        if(Groups != null && Groups.Length > 0){
+            builder.AddField("Groups:", string.Join("\n", Groups));
+        }
+        if(Languages != null && Languages.Length > 0){
+            builder.AddField("Languages:", string.Join("\n", Languages));
+        }
+        if(Categories != null && Categories.Length > 0){
+            builder.AddField("Categories:", string.Join("\n", Categories));
+        }
         
         return builder.Build();
     }

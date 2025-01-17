@@ -9,25 +9,6 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
         await RespondAsync("Pong! "+input);
     }
 
-    [SlashCommand("old-book", "Get information about a particular book! Identify it using its nhentai ID!")]
-    public async Task OldBook(string id){
-        try{
-            int realId = int.Parse(id);
-            Book book = WebScraping.GetBookFromWeb(realId);
-            if(book != null){
-                await RespondAsync("BOOK RECEIVED!!!\nName: "+book.Name+
-                "\nFirst tag: "+book.Tags[0]+"\nLast tag: "+book.Tags[book.Tags.Length-1]+
-                "\nPages: "+book.Pages+"\nParody: "+book.Parody[0]+"\nCover: "+book.Cover);
-            }else{
-                await RespondAsync("I'm sowwy! I couldn't find that book, master :(");
-            }
-        }catch(Exception e){
-            Console.WriteLine(e.Message);
-            Console.WriteLine(e.StackTrace);
-            await RespondAsync("I'm sowwy! There was an error processing that book, master :(");
-        }
-    }
-
     [SlashCommand("book", "Get information about a particular book! Identify it using its nhentai ID!")]
     public async Task Book(string id){
         try{
