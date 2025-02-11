@@ -95,6 +95,7 @@ public class NChanDatabase
         InsertBookAncillaryInfo(book.Id, book.Groups, "group", "groups", com);
         InsertBookAncillaryInfo(book.Id, book.Categories, "category", "categories", com);
         InsertBookAncillaryInfo(book.Id, book.Languages, "language", "languages", com);
+        conn.Close();
         return true;
     }
 

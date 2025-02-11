@@ -17,6 +17,7 @@ public class MasterProcess
     //in each bot's subdirectories.
     public static string databaseConnectionString = new SqliteConnectionStringBuilder(){
             DataSource = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GigaSharp.db"),
+            Mode = SqliteOpenMode.ReadWriteCreate,
             ForeignKeys = true
         }.ToString();
 
