@@ -25,13 +25,19 @@ public class WebScraping{
         Book.BookBuilder builder = new Book.BookBuilder().AddId(id)
             .AddDoc(doc)
             .AddName(infoBlock.Element("h1").InnerText)
-            .AddCover(doc.DocumentNode.SelectSingleNode("//div[@class=\"cover\"]/a/img").Attributes["data-src"].Value)
             .AddFirstPage(firstPage.DocumentNode.SelectSingleNode("//a[@class=\"fw_img\"]/img").Attributes["data-src"].Value);
         
         HtmlNodeCollection infoBlockCategories = infoBlock.SelectNodes("//li[position()<last()-1]/span");
         foreach(HtmlNode node in infoBlockCategories){
-            string[] elements = new string[node.ParentNode.ChildNodes.Count-1];
-            FillInfoBlockArray(elements, node);
+            //NOTE: node.ParentNode.ChildNodes.Count-1 is the 1-based count of how many elements this set should have.
+            //I'm fairly sure that by initializing this set with that capacity, we avoid ever having to do the
+            //expensive resize operation on adding an element, but I could also be wrong, and the program could be
+            //resizing it on the last add without me knowing. Based on Microsoft's documentation, the resize happens if
+            //"the Set's count is already equal to its capacity on add", which means it shouldn't, but you know,
+            //you can never be too careful.
+            //I <3 my useless optimizations
+            HashSet<string> elements = new HashSet<string>(node.ParentNode.ChildNodes.Count-1);
+            FillInfoBlockArray(elements, node, node.ParentNode.ChildNodes.Count-1);
             switch (node.InnerText){
                 case "Parodies:": builder.AddParody(elements);
                     break;
@@ -51,13 +57,15 @@ public class WebScraping{
         }
         builder.AddPages(int.Parse(infoBlock.SelectSingleNode("//span[@class=\"tag_name pages\"]").InnerText));
 
-        return builder.Build();
+        Book book = builder.Build();
+        NChanDatabase.InsertBook(book); //WARNING: Executing this line synchronously may cause HUGE timeout problems. Insertion takes a long time.
+        return book;
     }
 
-    private static void FillInfoBlockArray(string[] infoBlockCategory, HtmlNode htmlReference){
+    private static void FillInfoBlockArray(HashSet<string> infoBlockCategory, HtmlNode htmlReference, int target){
         htmlReference = htmlReference.NextSibling;
         int i = 0;
-        for(i = 0; htmlReference!=null && i < infoBlockCategory.Length; i++){
+        for(i = 0; htmlReference!=null && i < target; i++){
             HtmlNode name = htmlReference.SelectSingleNode("span[@class=\"tag_name\"]");
             HtmlNodeCollection discard = name.SelectNodes("span");
             if(discard != null){
@@ -65,10 +73,10 @@ public class WebScraping{
                     name.RemoveChild(child);
                 }
             }
-            infoBlockCategory[i] = name.InnerText;
+            infoBlockCategory.Add(name.InnerText);
             htmlReference = htmlReference.NextSibling;
         }
-        if(htmlReference != null || i < infoBlockCategory.Length){
+        if(htmlReference != null || i < target){
             throw new Exception("Error on filling an info block array! Index at "+i+" and htmlreference null: "+(htmlReference==null));
         }
     }
