@@ -37,7 +37,10 @@ public class Book {
         if(Categories != null && Categories.Count > 0){
             firstColumn += "**Categories:**\n"+string.Join("\n", Categories);
         }
-        builder.AddField("Content information:", (firstColumn != "") ? firstColumn : "_ _", true);
+        if(firstColumn != ""){
+            builder.AddField("Content information:", (firstColumn != "") ? firstColumn : "_ _", true);
+        }
+        
 
         if(Tags != null && Tags.Count > 0){
             builder.AddField("Tags:", string.Join("\n", Tags), true);
@@ -52,7 +55,9 @@ public class Book {
         if(Groups != null && Groups.Count > 0){
             thirdColumn += "**Groups:**\n"+string.Join("\n", Groups)+"\n";
         }
-        builder.AddField("Credit to:", (thirdColumn != "") ? thirdColumn : "_ _", true);
+        if(thirdColumn != ""){
+            builder.AddField("Credit to:", (thirdColumn != "") ? thirdColumn : "_ _", true);
+        }
         
         return builder.Build();
     }

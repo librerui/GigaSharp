@@ -4,6 +4,10 @@ using Microsoft.Data.Sqlite;
 
 public class NChanDatabase
 {
+    //This flag marks whether or not a modification is currently underway in N-Chan's portion of the
+    //database. This is necessary because we do not want two books to be able to be written at the same
+    //time, because if they're the same book, we'll cause a database error.
+    public static bool modificationOngoing = false;
     public static void CreateDatabase(SqliteConnection conn){
         SqliteCommand com = conn.CreateCommand();
         com.CommandText = File.ReadAllText(Path.Combine(MasterProcess.sqlScriptsDirectory, "nchan-create-db.sql"));
@@ -14,6 +18,7 @@ public class NChanDatabase
     // Remember to ALWAYS check the MasterProcess.databaseReady flag before any and all database operations
     // (except for creating it, of course). The GigaSharp database will be *massive* and we need to account for how long
     // it will take to download it from its remote host.
+    // Also remember to check for and delay/cancel any write operations should the modificationOngoing flag be set.
 
     public static Book GetBook(int id){
         if(!MasterProcess.databaseReady){return null;}
@@ -21,59 +26,70 @@ public class NChanDatabase
         SqliteConnection conn = new SqliteConnection(MasterProcess.databaseConnectionString);
         conn.Open();
         SqliteCommand com = conn.CreateCommand();
-        com.CommandText = File.ReadAllText(Path.Combine(MasterProcess.sqlScriptsDirectory, "nchan-get-book-full.sql"));
+        com.CommandText = "SELECT title, pages, firstPage FROM book WHERE id = $id";
         com.Parameters.AddWithValue("$id", id);
         SqliteDataReader res = com.ExecuteReader();
+        com.Parameters.Clear();
         if(!res.Read()){
             res.Close();
             conn.Close();
             return null;
         }
         builder.AddId(id);
-        builder.AddName(res.GetString(1));
-        builder.AddPages(res.GetInt32(2));
-        builder.AddFirstPage(res.GetString(3));
-        int maxCapacity = res.GetInt32(0);
-        HashSet<string> languages = new HashSet<string>(); //Allegedly, when C# constructs a default HashSet, its
-        HashSet<string> tags = new HashSet<string>(maxCapacity); //initial capacity is 4. Once a HashSet needs to be
-        HashSet<string> parodies = new HashSet<string>(); //resized, it's resized to double its current capacity. In
-        HashSet<string> characters = new HashSet<string>(); //the overwhelming majority of cases, 4 is enough for all of
-        HashSet<string> artists = new HashSet<string>(); //these lists apart from tags, and to avoid a lot of new sets
-        HashSet<string> groups = new HashSet<string>(); //being created internally with continuously bigger and often
-        HashSet<string> categories = new HashSet<string>(); //wasteful sizes, we'll adjust its initial capacity right now.
-        //It should be noted that the above information about the default set size doesn't come from an official source,
-        //in fact I couldn't find any microsoft documentation on HashSet's official sizes, rather just a blog post,
-        //so it's not strictly trustworthy. It sounds plausible, though, so I'll believe it, since I couldn't find
-        //anything to the contrary.
-        do{
-            //Getting a book from the database is the operation that inspired me to use HashSets for these lists, and
-            //this loop is the main reason why. Given that all of these are stored on separate tables, our choices for
-            //a "get book" database operation are perform multiple queries to get each table's contents and add them all,
-            //which is an ok but verbose solution, or performing a single query and dealing with the fact that there will
-            //be repeated information in different rows. HashSets allow us to do this latter approach without worrying
-            //about checking for duplicates, given that they don't allow them by default in an O(1) operation.
-            artists.Add(res.GetString(4));
-            tags.Add(res.GetString(5));
-            parodies.Add(res.GetString(6));
-            characters.Add(res.GetString(7));
-            groups.Add(res.GetString(8));
-            categories.Add(res.GetString(9));
-            languages.Add(res.GetString(10));
-        }while(res.Read());
+        builder.AddName(res.GetString(0));
+        builder.AddPages(res.GetInt32(1));
+        builder.AddFirstPage(res.GetString(2));
         res.Close();
+        //What you see below is a generic function being used to fill the hash sets of the book.
+        //My original idea was to just have one big query that would return everything, but I eventually
+        //ran into problems when it comes to books that don't have all their ancillary info (like groups)
+        //Given that we have an auxiliary table connecting the book table and each list's table, if I
+        //tried using INNER JOIN for everything, there not being an overlap between the book and a list
+        //made it so nothing got returned. I also tried using LEFT/RIGHT join, but they wouldn't work for
+        //the connection between the auxiliary table and the list table, and INNER there caused the same
+        //problem. So, we just use several queries instead.
+        //It's probably possible to just create 1 query, but I'm not a database engineer.
+        builder.AddLanguages(GetBookAncillaryInfo(id, "language", "languages", com));
+        builder.AddTags(GetBookAncillaryInfo(id, "tag", "tags", com));
+        builder.AddParody(GetBookAncillaryInfo(id, "parody", "parodies", com));
+        builder.AddCharacters(GetBookAncillaryInfo(id, "character", "characters", com));
+        builder.AddArtists(GetBookAncillaryInfo(id, "artist", "artists", com));
+        builder.AddGroups(GetBookAncillaryInfo(id, "group", "groups", com));
+        builder.AddCategories(GetBookAncillaryInfo(id, "category", "categories", com));
         conn.Close();
-        builder.AddLanguages(languages);
-        builder.AddTags(tags);
-        builder.AddParody(parodies);
-        builder.AddCharacters(characters);
-        builder.AddArtists(artists);
-        builder.AddGroups(groups);
-        builder.AddCategories(categories);
         return builder.Build();
     }
 
+    private static HashSet<string> GetBookAncillaryInfo(int id, string infoNameSingular, string infoNamePlural, SqliteCommand com){
+        //QUICK EXPLANATION: You might be wondering why there's a COUNT(*) here. Well, it's to save memory.
+        //According to a tech blog I saw (Microsoft's documentation doesn't provide any answers to this),
+        //when a C# HashSet is constructed without capacity information, its default capacity is 4 items.
+        //And when hashsets resize they create a new data structure that has double the capacity. This is
+        //of course to be avoided if possible, especially because it creates many garbage structures that
+        //aren't used and get GC'd, and given that there can be *many* tags, we have COUNT(*) there for
+        //the small memory optimization.
+        com.CommandText = "SELECT \""+infoNameSingular+"\".name AS name FROM book"
+            +" INNER JOIN book_"+infoNamePlural+" ON book.id = book_"+infoNamePlural+".book_id"
+            +" INNER JOIN \""+infoNameSingular+"\" ON \""+infoNameSingular+"\".id = book_"+infoNamePlural+"."+infoNameSingular+"_id"
+            +" WHERE book.id = $id";
+        com.Parameters.AddWithValue("$id", id);
+        SqliteDataReader res = com.ExecuteReader();
+        com.Parameters.Clear();
+        if(!res.Read()){
+            res.Close();
+            return null;
+        }
+        HashSet<string> set = new HashSet<string>();
+        do{
+            set.Add(res.GetString(0));
+        }while(res.Read());
+        res.Close();
+        return set;
+    }
+
     public static bool InsertBook(Book book){
-        if(!MasterProcess.databaseReady){return false;}
+        if(!MasterProcess.databaseReady || modificationOngoing){return false;}
+        modificationOngoing = true;
         SqliteConnection conn = new SqliteConnection(MasterProcess.databaseConnectionString);
         conn.Open();
         SqliteCommand com = conn.CreateCommand();
@@ -88,14 +104,15 @@ public class NChanDatabase
             return false;
         }
         com.Parameters.Clear();
-        InsertBookAncillaryInfo(book.Id, book.Artists, "artist", "artists", com);
-        InsertBookAncillaryInfo(book.Id, book.Tags, "tag", "tags", com);
-        InsertBookAncillaryInfo(book.Id, book.Parody, "parody", "parodies", com);
-        InsertBookAncillaryInfo(book.Id, book.Characters, "character", "characters", com);
-        InsertBookAncillaryInfo(book.Id, book.Groups, "group", "groups", com);
-        InsertBookAncillaryInfo(book.Id, book.Categories, "category", "categories", com);
-        InsertBookAncillaryInfo(book.Id, book.Languages, "language", "languages", com);
+        if(book.Artists != null && book.Artists.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Artists, "artist", "artists", com); }
+        if(book.Tags != null && book.Tags.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Tags, "tag", "tags", com); }
+        if(book.Parody != null && book.Parody.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Parody, "parody", "parodies", com); }
+        if(book.Characters != null && book.Characters.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Characters, "character", "characters", com); }
+        if(book.Groups != null && book.Groups.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Groups, "group", "groups", com); }
+        if(book.Categories != null && book.Categories.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Categories, "category", "categories", com); }
+        if(book.Languages != null && book.Languages.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Languages, "language", "languages", com); }
         conn.Close();
+        modificationOngoing = false;
         return true;
     }
 
@@ -107,13 +124,13 @@ public class NChanDatabase
         //First, we iterate over every item in the list, obviously.
         foreach(string item in info){
             //We will first try to search the list's table for each item's ID.
-            com.CommandText = "SELECT id FROM " + infoNameSingular + " WHERE name = $name";
+            com.CommandText = "SELECT id FROM \"" + infoNameSingular + "\" WHERE name = $name";
             com.Parameters.AddWithValue("$name", item); //Titles can have special characters, so this way of adding parameters is important.
             SqliteDataReader res = com.ExecuteReader();
             com.Parameters.Clear(); // Clearing may not be strictly necessary given that we'll reuse the parameter, but just to be safe.
             if(!res.Read()){ // Should the query not return anything, we'll instead attempt to insert the item
                 res.Close();
-                com.CommandText = "INSERT INTO "+infoNameSingular+" (name) VALUES ($name)";
+                com.CommandText = "INSERT INTO \""+infoNameSingular+"\" (name) VALUES ($name)";
                 com.Parameters.AddWithValue("$name", item);
                 if(com.ExecuteNonQuery() != 1){ //ExecuteNonQuery tell us the nº of affected rows: If it's not 1, something has gone wrong.
                     com.Parameters.Clear();
@@ -130,9 +147,10 @@ public class NChanDatabase
                     //but more importantly, 2- Are a pain in the ass to implement, and I don't want to do that.
                 }
                 com.Parameters.Clear(); //With the insertion done, we will redo the intial command.
-                com.CommandText = "SELECT id FROM " + infoNameSingular + " WHERE name = $name";
+                com.CommandText = "SELECT id FROM \"" + infoNameSingular + "\" WHERE name = $name";
                 com.Parameters.AddWithValue("$name", item);
                 res = com.ExecuteReader();
+                res.Read();
                 com.Parameters.Clear();
                 //Yes, I know, the constant clearing seems redundant, and it probably is, but SQLite is finnicky as hell,
                 //and I don't want to take any chances.

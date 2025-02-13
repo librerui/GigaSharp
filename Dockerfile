@@ -1,5 +1,8 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+RUN mkdir /app/db
+RUN chmod -R 777 /app/db
+VOLUME /app/db
 EXPOSE 5000
 
 ENV ASPNETCORE_URLS=http://+:5000
@@ -20,5 +23,6 @@ RUN dotnet publish "GigaSharp.csproj" -c $configuration -o /app/publish /p:UseAp
 
 FROM base AS final
 WORKDIR /app
+COPY sql ./sql
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "GigaSharp.dll"]

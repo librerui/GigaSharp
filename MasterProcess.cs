@@ -1,5 +1,6 @@
 namespace GigaSharp;
 
+using System.Diagnostics;
 using Microsoft.Data.Sqlite;
 
 public class MasterProcess
@@ -16,7 +17,7 @@ public class MasterProcess
     //be declared as an absolute path in order to avoid relative path complications when this string is referenced
     //in each bot's subdirectories.
     public static string databaseConnectionString = new SqliteConnectionStringBuilder(){
-            DataSource = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GigaSharp.db"),
+            DataSource = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "db/GigaSharp.db"),
             Mode = SqliteOpenMode.ReadWriteCreate,
             ForeignKeys = true
         }.ToString();
