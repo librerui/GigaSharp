@@ -52,6 +52,7 @@ public class NChanMain
             SocketInteractionContext ctx = new SocketInteractionContext(client, interaction);
             await service.ExecuteCommandAsync(ctx, services);
         };
+        client.ButtonExecuted += NChanCommands.ButtonHandler;
     }
 
     private async Task ReadyAsync(){

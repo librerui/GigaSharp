@@ -1,6 +1,9 @@
 namespace GigaSharp;
 
+using System.Runtime.InteropServices;
+using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 
 public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
 {
@@ -84,6 +87,63 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
             Console.WriteLine(e.Message);
             Console.WriteLine(e.StackTrace);
             await RespondAsync("I'm sowwy! There was an error processing the chosen book, master :(");
+        }
+    }
+
+    [SlashCommand("read", "Read a book of your choice, page by page!")]
+    public async Task Read(string id){
+        try{
+            int realId = int.Parse(id);
+            ComponentBuilder builder = new ComponentBuilder();
+            builder.WithButton("Previous page", "readCommand prev");
+            builder.WithButton("Next page", "readCommand next");
+            builder.WithButton("Go to start page", "readCommand goToStart");
+            Book book = NChanDatabase.GetBook(realId);
+            if(book != null){
+                builder.WithButton("Go to end page", "readCommand goToEnd "+book.Pages);
+                builder.WithButton("Open book on site", url: "https://nhentai.xxx/g/"+book.Id, style: ButtonStyle.Link);
+                await RespondAsync(embed: new EmbedBuilder().WithTitle(book.Name).WithImageUrl(book.FirstPage).Build(), components: builder.Build());
+            }else{
+                book = WebScraping.GetBookFromWeb(realId);
+                if(book != null){
+                    builder.WithButton("Go to end page", "readCommand goToEnd "+book.Pages);
+                    builder.WithButton("Open book on site", url: "https://nhentai.xxx/g/"+book.Id, style: ButtonStyle.Link);
+                    await RespondAsync(embed: new EmbedBuilder().WithTitle(book.Name).WithImageUrl(book.FirstPage).Build(), components: builder.Build());
+                }else{
+                    await RespondAsync("Master! That book doesn't exist 3:");
+                }
+            }
+        }catch(Exception e){
+            Console.WriteLine(e.Message);
+            Console.WriteLine(e.StackTrace);
+            await RespondAsync("I'm sowwy! There was an error processing that command, master :(");
+        }
+    }
+
+    public static async Task ButtonHandler(SocketMessageComponent component){
+        string[] args = component.Data.CustomId.Split(" ");
+        switch(args[0]){
+            case "readCommand":
+                Embed embed = component.Message.Embeds.First();
+                string url = embed.Image.ToString();
+                int filenameDot = url.LastIndexOf(".");
+                int slashBeforeFilename = url.LastIndexOf("/") + 1;
+                int pageNumberDigitCount = filenameDot - slashBeforeFilename;
+                int pageNumber = int.Parse(url.Substring(slashBeforeFilename, pageNumberDigitCount));
+                url = url.Remove(slashBeforeFilename, pageNumberDigitCount);
+                switch(args[1]){
+                    case "prev": pageNumber--;
+                        break;
+                    case "next": pageNumber++;
+                        break;
+                    case "goToStart": pageNumber = 1;
+                        break;
+                    case "goToEnd": pageNumber = int.Parse(args[2]);
+                        break;
+                }
+                url = url.Insert(slashBeforeFilename, pageNumber.ToString());
+                await component.UpdateAsync(x => x.Embed = new EmbedBuilder().WithTitle(embed.Title).WithImageUrl(url).Build());
+                break;
         }
     }
 }
