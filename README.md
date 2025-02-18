@@ -15,3 +15,7 @@ First stable progress release of the project. Capable of logging into a bot and 
 * **2025-01-17: Version 0.2, commit d14b574**
 
 Most basic n-chan functionalities complete: Fully functional web scraping all necessary book data from nhentai, functional 404 detection system, functional slash command interface, functional book discord message embed creation, and ping bot, ping nhentai, book, random, and exists commands added.
+
+* **2025-02-17: Version 0.3, commit 8549d9b**
+
+Basic, stable database added (but very rudimentary and not without its problems as highlighted in the issues tab). Books are now retrieved from the database when possible rather than webscraped. Read command also added and fully functional.
