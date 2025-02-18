@@ -62,6 +62,67 @@ public class Book {
         return builder.Build();
     }
 
+    private (double, List<(string, int)>) RateBook(){
+        //A book without enough tags is impossible to rate, therefore we return a score of -1
+        if(Tags == null || Tags.Count <= 2){
+            return (-1, null);
+        }
+        //IMPORTANT: Right now, we're getting every tag's popularity through webscraping.
+        //This is obviously bad, but we need it, because the database doesn't provide an alternative.
+        List<(string, int)> tagPopularity = WebScraping.GetBookTagsPopularity(Id);
+        tagPopularity.Sort(delegate((string, int) part1, (string, int) part2){
+            return part2.Item2.CompareTo(part1.Item2);
+        });
+        double tagMean = 0;
+        foreach((string, int) item in tagPopularity){
+            tagMean += item.Item2;
+        }
+        tagMean /= tagPopularity.Count;
+        return (tagMean / 10000, tagPopularity);
+    }
+
+    public string CreateRateMessage(){
+        string message = "";
+        switch(Pages){
+            case <=15: message += "It's a short book, with only "+Pages+" pages!\n";
+                break;
+            case <=50: message += "It's a medium book, with only "+Pages+" pages!\n";
+                break;
+            case <=150: message += "It's a long book, with up to "+Pages+" pages!\n";
+                break;
+            default: message += "It's a really long book, with up to "+Pages+" pages!\n";
+                break;
+        }
+        switch(Tags.Count){
+            case <=5: message += "It's poorly tagged, with only "+Tags.Count+" tags!\n";
+                break;
+            case <=10: message += "It's fairly tagged, with "+Tags.Count+" tags!\n";
+                break;
+            default: message += "It's well tagged, with up to "+Tags.Count+" tags!\n";
+                break;
+        }
+        (double, List<(string, int)>) rateScore = RateBook();
+        switch(rateScore.Item1){
+            case -1: message += "It really doesn't have many tags, so it's hard to judge it 3:\n";
+                break;
+            case <5: message += "It's on the weirder side, appealing to niches like "+rateScore.Item2[rateScore.Item2.Count-1]+" and "+rateScore.Item2[rateScore.Item2.Count-2]+"\n";
+                break;
+            default: message += "It appeals to a wider audience, with tags like "+rateScore.Item2[0].Item1+" and "+rateScore.Item2[1].Item1+"\n";
+                break;
+        }
+        if(Pages <= 20){
+            rateScore.Item1 /= 1.5;
+        }
+        if(rateScore.Item1 < 0){
+            rateScore.Item1 = 0;
+        }
+        message += "\nMy final rating is one of: "+Math.Round(rateScore.Item1, 2)+" ";
+        for(int i = 0; i < rateScore.Item1; i++){
+            message += ":star:";
+        }
+        return message;
+    }
+
     public class BookBuilder{
         Book b = new Book();
         public Book Build() { return b; }

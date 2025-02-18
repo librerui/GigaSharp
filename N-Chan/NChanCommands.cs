@@ -90,6 +90,28 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
         }
     }
 
+    [SlashCommand("rate", "Get a rating for a book of your choice!")]
+    public async Task Rate(string id){
+        try{
+            int realId = int.Parse(id);
+            Book book = NChanDatabase.GetBook(realId);
+            if(book != null){
+                await RespondAsync(book.CreateRateMessage());
+            }else{
+                book = WebScraping.GetBookFromWeb(realId);
+                if(book != null){
+                    await RespondAsync(book.CreateRateMessage());
+                }else{
+                    await RespondAsync("Master! That book doesn't exist 3:");
+                }
+            }
+        }catch(Exception e){
+            Console.WriteLine(e.Message);
+            Console.WriteLine(e.StackTrace);
+            await RespondAsync("I'm sowwy! There was an error processing that command, master :(");
+        }
+    }
+
     [SlashCommand("read", "Read a book of your choice, page by page!")]
     public async Task Read(string id){
         try{
@@ -120,6 +142,16 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
         }
     }
 
+    //-------------------------------------------------------------------------------------------
+    //----------------------- BELOW THIS IS EVENT HANDLERS, NOT COMMANDS ------------------------
+    //-------------------------------------------------------------------------------------------
+
+    //This function is the master button handler function.
+    //Whenever ANY buttons are pressed, this function will fire and receive the pressed button as
+    //an argument. You must check the button's CustomID to know how to proceed.
+    //In order to pass as much information as we can, custom IDs will be allowed to have "arguments"
+    //of sorts separated by whitespaces.
+    //WARNING: Don't try to create follow-up messages here, it doesn't work for some reasons.
     public static async Task ButtonHandler(SocketMessageComponent component){
         string[] args = component.Data.CustomId.Split(" ");
         switch(args[0]){

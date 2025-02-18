@@ -81,11 +81,32 @@ public class WebScraping{
         }
     }
 
-    //Unused
-    /*public static bool DoesBookExist(int id){
+    public static List<(string, int)> GetBookTagsPopularity(int id){
         HtmlDocument doc = new HtmlWeb().Load("https://nhentai.xxx/g/"+id);
-        return !CheckIf404(doc);
-    }*/
+        if(doc == null) { return null; }
+        List<(string, int)> result = new List<(string, int)>();
+        HtmlNodeCollection infoBlockCategories = doc.DocumentNode.SelectNodes("//div[@class=\"info\"]//li[position()<last()-1]/span");
+        foreach(HtmlNode node in infoBlockCategories){
+            if(node.InnerText != "Tags:"){
+                continue;
+            }
+            HtmlNode htmlReference = node.NextSibling;
+            while(htmlReference != null){
+                HtmlNode name = htmlReference.SelectSingleNode("span[@class=\"tag_name\"]");
+                HtmlNode count = htmlReference.SelectSingleNode("span[@class=\"tag_count\"]");
+                HtmlNodeCollection discard = name.SelectNodes("span");
+                if(discard != null){
+                    foreach(HtmlNode child in discard){
+                        name.RemoveChild(child);
+                    }
+                }
+                result.Add((name.InnerText, int.Parse(count.InnerText.Replace("K", "000"))));
+                htmlReference = htmlReference.NextSibling;
+            }
+            break;
+        }
+        return result;
+    }
 
     private static bool CheckIf404(HtmlDocument doc){
         return doc.DocumentNode.SelectSingleNode("//div[@class=\"content_box\"]") != null;
