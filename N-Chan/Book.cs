@@ -105,7 +105,7 @@ public class Book {
         switch(rateScore.Item1){
             case -1: message += "It really doesn't have many tags, so it's hard to judge it 3:\n";
                 break;
-            case <5: message += "It's on the weirder side, appealing to niches like "+rateScore.Item2[rateScore.Item2.Count-1]+" and "+rateScore.Item2[rateScore.Item2.Count-2]+"\n";
+            case <5: message += "It's on the weirder side, appealing to niches like "+rateScore.Item2[rateScore.Item2.Count-1].Item1+" and "+rateScore.Item2[rateScore.Item2.Count-2].Item1+"\n";
                 break;
             default: message += "It appeals to a wider audience, with tags like "+rateScore.Item2[0].Item1+" and "+rateScore.Item2[1].Item1+"\n";
                 break;

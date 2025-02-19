@@ -61,13 +61,6 @@ public class NChanDatabase
     }
 
     private static HashSet<string> GetBookAncillaryInfo(int id, string infoNameSingular, string infoNamePlural, SqliteCommand com){
-        //QUICK EXPLANATION: You might be wondering why there's a COUNT(*) here. Well, it's to save memory.
-        //According to a tech blog I saw (Microsoft's documentation doesn't provide any answers to this),
-        //when a C# HashSet is constructed without capacity information, its default capacity is 4 items.
-        //And when hashsets resize they create a new data structure that has double the capacity. This is
-        //of course to be avoided if possible, especially because it creates many garbage structures that
-        //aren't used and get GC'd, and given that there can be *many* tags, we have COUNT(*) there for
-        //the small memory optimization.
         com.CommandText = "SELECT \""+infoNameSingular+"\".name AS name FROM book"
             +" INNER JOIN book_"+infoNamePlural+" ON book.id = book_"+infoNamePlural+".book_id"
             +" INNER JOIN \""+infoNameSingular+"\" ON \""+infoNameSingular+"\".id = book_"+infoNamePlural+"."+infoNameSingular+"_id"
@@ -87,36 +80,49 @@ public class NChanDatabase
         return set;
     }
 
-    public static bool InsertBook(Book book){
-        if(!MasterProcess.databaseReady || modificationOngoing){return false;}
+    public async static Task<bool> InsertBook(Book book){
+        int secsElapsed = 0;
+        while((!MasterProcess.databaseReady || modificationOngoing) && secsElapsed < 10){
+            await Task.Delay(1000);
+            secsElapsed++;
+        }
+        if(secsElapsed == 10){return false;}
         modificationOngoing = true;
         SqliteConnection conn = new SqliteConnection(MasterProcess.databaseConnectionString);
-        conn.Open();
-        SqliteCommand com = conn.CreateCommand();
-        com.CommandText = @"INSERT INTO book (id, title, firstPage, pages)
-            VALUES ($id, $title, $firstpage, $pages)";
-        com.Parameters.AddWithValue("$id", book.Id);
-        com.Parameters.AddWithValue("$title", book.Name);
-        com.Parameters.AddWithValue("$firstpage", book.FirstPage);
-        com.Parameters.AddWithValue("$pages", book.Pages);
-        if(com.ExecuteNonQuery() != 1){
-            Console.WriteLine("BOOK INSERTION FAILED - COMMAND TEXT WAS:\n"+com.CommandText);
+        await conn.OpenAsync();
+        System.Data.Common.DbTransaction transaction = await conn.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        try{
+            SqliteCommand com = conn.CreateCommand();
+            com.CommandText = @"INSERT INTO book (id, title, firstPage, pages)
+                VALUES ($id, $title, $firstpage, $pages)";
+            com.Parameters.AddWithValue("$id", book.Id);
+            com.Parameters.AddWithValue("$title", book.Name);
+            com.Parameters.AddWithValue("$firstpage", book.FirstPage);
+            com.Parameters.AddWithValue("$pages", book.Pages);
+            if(await com.ExecuteNonQueryAsync() != 1){
+                throw new Exception("BOOK INFO INSERTION FAILED - COMMAND TEXT WAS:\n"+com.CommandText);
+            }
+            com.Parameters.Clear();
+            if(book.Artists != null && book.Artists.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Artists, "artist", "artists", com); }
+            if(book.Tags != null && book.Tags.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Tags, "tag", "tags", com); }
+            if(book.Parody != null && book.Parody.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Parody, "parody", "parodies", com); }
+            if(book.Characters != null && book.Characters.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Characters, "character", "characters", com); }
+            if(book.Groups != null && book.Groups.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Groups, "group", "groups", com); }
+            if(book.Categories != null && book.Categories.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Categories, "category", "categories", com); }
+            if(book.Languages != null && book.Languages.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Languages, "language", "languages", com); }
+            await transaction.CommitAsync();
+            await conn.CloseAsync();
+            modificationOngoing = false;
+            return true;
+        }catch (Exception e){
+            Console.WriteLine(e.Message);
+            await transaction.RollbackAsync();
+            await conn.CloseAsync();
             return false;
         }
-        com.Parameters.Clear();
-        if(book.Artists != null && book.Artists.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Artists, "artist", "artists", com); }
-        if(book.Tags != null && book.Tags.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Tags, "tag", "tags", com); }
-        if(book.Parody != null && book.Parody.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Parody, "parody", "parodies", com); }
-        if(book.Characters != null && book.Characters.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Characters, "character", "characters", com); }
-        if(book.Groups != null && book.Groups.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Groups, "group", "groups", com); }
-        if(book.Categories != null && book.Categories.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Categories, "category", "categories", com); }
-        if(book.Languages != null && book.Languages.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Languages, "language", "languages", com); }
-        conn.Close();
-        modificationOngoing = false;
-        return true;
     }
 
-    private static void InsertBookAncillaryInfo(int id, HashSet<string> info, string infoNameSingular, string infoNamePlural, SqliteCommand com){
+    private async static void InsertBookAncillaryInfo(int id, HashSet<string> info, string infoNameSingular, string infoNamePlural, SqliteCommand com){
         
         //This method is quite confusing, and worse than that, extremely important, so I'll provide a
         //fairly detailed explanation of its workings.
@@ -126,30 +132,20 @@ public class NChanDatabase
             //We will first try to search the list's table for each item's ID.
             com.CommandText = "SELECT id FROM \"" + infoNameSingular + "\" WHERE name = $name";
             com.Parameters.AddWithValue("$name", item); //Titles can have special characters, so this way of adding parameters is important.
-            SqliteDataReader res = com.ExecuteReader();
+            SqliteDataReader res = await com.ExecuteReaderAsync();
             com.Parameters.Clear(); // Clearing may not be strictly necessary given that we'll reuse the parameter, but just to be safe.
-            if(!res.Read()){ // Should the query not return anything, we'll instead attempt to insert the item
+            if(!await res.ReadAsync()){ // Should the query not return anything, we'll instead attempt to insert the item
                 res.Close();
                 com.CommandText = "INSERT INTO \""+infoNameSingular+"\" (name) VALUES ($name)";
                 com.Parameters.AddWithValue("$name", item);
-                if(com.ExecuteNonQuery() != 1){ //ExecuteNonQuery tell us the nº of affected rows: If it's not 1, something has gone wrong.
+                if(await com.ExecuteNonQueryAsync() != 1){ //ExecuteNonQuery tell us the nº of affected rows: If it's not 1, something has gone wrong.
                     com.Parameters.Clear();
-                    Console.WriteLine("BOOK INFO INSERTION FAILED - COMMAND TEXT WAS:\n"+com.CommandText);
-                    continue;
-                    //It's at this point that I feel obliged to point out that this is actually quite terrible.
-                    //What SHOULD be happening here is that this failure throws an exception and causes the entire insertion
-                    //process to be rolled back (which *is* possible in SQLite): But I've elected, against my best senses,
-                    //to not do that.
-                    //This is because transactions in SQLite 1- Are strictly blocking procedures, meaning two transactions
-                    //can never occur at the same time. Microsoft's documentation warns that this might cause transactions
-                    //to time out often, and this is even more so the case because discord commands time out very quick.
-                    //True enough that this doesn't matter too much given the bot will barely see two people using it at once,
-                    //but more importantly, 2- Are a pain in the ass to implement, and I don't want to do that.
+                    throw new Exception("BOOK INFO INSERTION FAILED - COMMAND TEXT WAS:\n"+com.CommandText);
                 }
                 com.Parameters.Clear(); //With the insertion done, we will redo the intial command.
                 com.CommandText = "SELECT id FROM \"" + infoNameSingular + "\" WHERE name = $name";
                 com.Parameters.AddWithValue("$name", item);
-                res = com.ExecuteReader();
+                res = await com.ExecuteReaderAsync();
                 res.Read();
                 com.Parameters.Clear();
                 //Yes, I know, the constant clearing seems redundant, and it probably is, but SQLite is finnicky as hell,
@@ -159,10 +155,8 @@ public class NChanDatabase
             int itemId = res.GetInt32(0);
             res.Close(); //And now we simply insert the required row into the auxiliary table.
             com.CommandText = "INSERT INTO book_"+infoNamePlural+" (book_id, "+infoNameSingular+"_id) VALUES ("+id+", "+itemId+")";
-            if(com.ExecuteNonQuery() != 1){
-                Console.WriteLine("BOOK INFO INSERTION FAILED - COMMAND TEXT WAS:\n"+com.CommandText);
-                //Once again, this suffers from the exact same problem I described above with the lack of transactions.
-                //No, I am not doing it unless it proves to be actually necessary.
+            if(await com.ExecuteNonQueryAsync() != 1){
+                throw new Exception("BOOK INFO INSERTION FAILED - COMMAND TEXT WAS:\n"+com.CommandText);
             }
         }
     }

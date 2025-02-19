@@ -58,7 +58,10 @@ public class WebScraping{
         builder.AddPages(int.Parse(infoBlock.SelectSingleNode("//span[@class=\"tag_name pages\"]").InnerText));
 
         Book book = builder.Build();
-        NChanDatabase.InsertBook(book); //WARNING: Executing this line synchronously may cause HUGE timeout problems. Insertion takes a long time.
+        //Database insertion is quite slow, so we fire and forget the Insert method.
+        //We also don't particularly care if this method actually succeeds: Even if a book for some
+        //reason can't be inserted, it's not that bad to webscrape it.
+        _ = NChanDatabase.InsertBook(book);
         return book;
     }
 
