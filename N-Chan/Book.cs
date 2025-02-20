@@ -117,7 +117,7 @@ public class Book {
             rateScore.Item1 = 0;
         }
         message += "\nMy final rating is one of: "+Math.Round(rateScore.Item1, 2)+" ";
-        for(int i = 0; i < rateScore.Item1; i++){
+        for(int i = 0; i < (int)rateScore.Item1; i++){
             message += ":star:";
         }
         return message;

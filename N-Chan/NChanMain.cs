@@ -49,7 +49,7 @@ public class NChanMain
         DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();
         client.Ready += ReadyAsync;
         Console.WriteLine("ADDING MODULE...");
-        await service.AddModulesAsync(Assembly.GetEntryAssembly(), services);
+        await service.AddModuleAsync(typeof(NChanCommands), services);
         Console.WriteLine("MODULE ADDED!");
         client.InteractionCreated += async (interaction) =>
         {
@@ -64,16 +64,18 @@ public class NChanMain
             throw new Exception("Services undefined upon attempting to register n-chan commands");
         }
         Console.WriteLine("STARTING REGISTRY...");
+        //Global registry (may take about an hour to take effect, but this is irrelevant most of the time)
+        //COMMENT THIS LINE OUT WHEN TESTING OUT NEW COMMANDS - BE CAREFUL ABOUT DUPLICATE COMMANDS GLOBALLY AND ON GUILDS
+        await services.GetRequiredService<InteractionService>().RegisterCommandsGloballyAsync();
         //Registering to n-chan test server
-        await services.GetRequiredService<InteractionService>().RegisterCommandsToGuildAsync(990317819059118100);
+        //await services.GetRequiredService<InteractionService>().RegisterCommandsToGuildAsync(990317819059118100);
         Console.WriteLine("COMMANDS REGISTERED!");
-
-        DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();
         Console.WriteLine("INTERACTIONS SET UP - STARTING BOOK OF THE DAY");
+        DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();
         botdChannels =
         [
             //By default, the n-chan-peak channel is a book of the day channel.
-            //botdChannels.Add(client.GetChannel(1062831763098959982) as IMessageChannel);
+            client.GetChannel(1062831763098959982) as IMessageChannel,
             //The line below this one sets the general channel in n-chan test as a book of the day channel.
             //client.GetChannel(990317819059118103) as IMessageChannel,
         ];
@@ -84,8 +86,6 @@ public class NChanMain
 
     private async Task BookOfTheDay(){
         while(true){
-            //Wait an hour
-            await Task.Delay(3600000);
             if(DateTime.UtcNow.Hour != 10){
                 continue;
             }
@@ -105,6 +105,8 @@ public class NChanMain
                 await channel.SendMessageAsync("Today's ("+DateTime.Now.Date.ToString("dd/MM/yyyy")+") book of the day is:", embed: embed);
                 await channel.SendMessageAsync(book.CreateRateMessage());
             }
+            //Wait an hour
+            await Task.Delay(3600000);
         }
     }
 
