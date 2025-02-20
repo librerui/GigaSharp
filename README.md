@@ -20,6 +20,6 @@ Most basic n-chan functionalities complete: Fully functional web scraping all ne
 
 Basic, stable database added (but very rudimentary and not without its problems as highlighted in the issues tab). Books are now retrieved from the database when possible rather than webscraped. Read command also added and fully functional.
 
-* **2025-02-20: Version 1.0, commit 4e63fe5**
+* **2025-02-20: Version 1.0, commit b74aec0**
 
 First stable, long-running, deployable version of the project. All basic n-chan functionalities finished, functional, and tested. Book of the day and book rating systems added. Commands made global, loose local commands deleted. It may also be possible to use n-chan commands in DMs if the user installs the application into their account.
