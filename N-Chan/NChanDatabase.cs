@@ -4,10 +4,6 @@ using Microsoft.Data.Sqlite;
 
 public class NChanDatabase
 {
-    //This flag marks whether or not a modification is currently underway in N-Chan's portion of the
-    //database. This is necessary because we do not want two books to be able to be written at the same
-    //time, because if they're the same book, we'll cause a database error.
-    public static bool modificationOngoing = false;
     public static void CreateDatabase(SqliteConnection conn){
         SqliteCommand com = conn.CreateCommand();
         com.CommandText = File.ReadAllText(Path.Combine(MasterProcess.sqlScriptsDirectory, "nchan-create-db.sql"));
@@ -82,12 +78,12 @@ public class NChanDatabase
 
     public async static Task<bool> InsertBook(Book book){
         int secsElapsed = 0;
-        while((!MasterProcess.databaseReady || modificationOngoing) && secsElapsed < 10){
+        while((!MasterProcess.databaseReady || MasterProcess.modificationOngoing) && secsElapsed < 5){
             await Task.Delay(1000);
             secsElapsed++;
         }
-        if(secsElapsed == 10){return false;}
-        modificationOngoing = true;
+        if(secsElapsed == 5){return false;}
+        MasterProcess.modificationOngoing = true;
         SqliteConnection conn = new SqliteConnection(MasterProcess.databaseConnectionString);
         await conn.OpenAsync();
         System.Data.Common.DbTransaction transaction = await conn.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
@@ -112,7 +108,7 @@ public class NChanDatabase
             if(book.Languages != null && book.Languages.Count > 0) { InsertBookAncillaryInfo(book.Id, book.Languages, "language", "languages", com); }
             await transaction.CommitAsync();
             await conn.CloseAsync();
-            modificationOngoing = false;
+            MasterProcess.modificationOngoing = false;
             return true;
         }catch (Exception e){
             Console.WriteLine(e.Message);

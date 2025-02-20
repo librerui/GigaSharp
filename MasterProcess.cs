@@ -8,6 +8,10 @@ public class MasterProcess
     //This flag marks whether or not the master database is currently ready for use.
     //By default it isn't, as the database needs to be downloaded or set up.
     public static bool databaseReady = false;
+    //This flag marks whether or not a modification is currently underway in the database.
+    //This is necessary because two transactions can't occur at the same time, and thus time out
+    //very easily: We want to control when they even start to avoid that.
+    public static bool modificationOngoing = false;
     //This is the absolute path to the sql directory in which all scripts are stored.
     //All bots will reference this string in order to get the script for any particular database operation they want.
     public static string sqlScriptsDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sql");
