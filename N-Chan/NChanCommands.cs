@@ -5,6 +5,9 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 
+//Enable these commands for use anywhere, even DMs, and with both guild and user installs.
+[CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm, InteractionContextType.PrivateChannel)]
+[IntegrationType(ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall)]
 public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
 {
     [SlashCommand("ping", "Get a pong!")]
