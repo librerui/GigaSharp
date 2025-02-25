@@ -35,6 +35,7 @@ public class MasterProcess
         //Start as many bots as you wish, one after the other.
         //All bots will run indefinitely and cannot be restarted if shut down.
         _ = NChanMain.StartBot();
+        _ = KnyadministratorMain.StartBot();
 
         var baseuri = Environment.GetEnvironmentVariable("HOST_URL");
         if(baseuri != null){

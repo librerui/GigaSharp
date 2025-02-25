@@ -7,7 +7,11 @@ using Discord.WebSocket;
 
 public class NChanMain
 {
-    public static HashSet<IMessageChannel> botdChannels;
+    //You might wonder why this is a ulong HashSet rather than an IMessageChannel HashSet,
+    //which would allow us to send messages directly with its contents.
+    //This is because the IMessageChannel class doesn't have a GetHashCode or Equals override,
+    //and thus doesn't work for storage in a HashSet.
+    public static HashSet<ulong> botdChannels;
     private static IServiceProvider services;
     /*
         Set up and start the actual N-Chan bot and keep it running indefinitely.
@@ -38,19 +42,16 @@ public class NChanMain
     }
 
     /*
-        Initialize all commands. Incomplete for now.
+        Initialize all commands.
     */
     private async Task SetUp(){
         if(services == null){
             throw new Exception("Services undefined upon attempting to set up n-chan");
         }
-        Console.WriteLine("PERFORMING N-CHAN SETUP");
         InteractionService service = services.GetRequiredService<InteractionService>();
         DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();
         client.Ready += ReadyAsync;
-        Console.WriteLine("ADDING MODULE...");
         await service.AddModuleAsync(typeof(NChanCommands), services);
-        Console.WriteLine("MODULE ADDED!");
         client.InteractionCreated += async (interaction) =>
         {
             SocketInteractionContext ctx = new SocketInteractionContext(client, interaction);
@@ -59,23 +60,26 @@ public class NChanMain
         client.ButtonExecuted += NChanCommands.ButtonHandler;
     }
 
+    /*
+        This function is triggered on the bot becoming fully ready for use.
+        This effectively serves as post-connection processing for anything that needs a working Discord login.
+    */
     private async Task ReadyAsync(){
         if(services == null){
             throw new Exception("Services undefined upon attempting to register n-chan commands");
         }
-        Console.WriteLine("STARTING REGISTRY...");
-        //Global registry (may take about an hour to take effect, but this is irrelevant most of the time)
+        //Global registry (MAY TAKE UP TO AN HOUR TO TAKE EFFECT)
         //COMMENT THIS LINE OUT WHEN TESTING OUT NEW COMMANDS - BE CAREFUL ABOUT DUPLICATE COMMANDS GLOBALLY AND ON GUILDS
         await services.GetRequiredService<InteractionService>().RegisterCommandsGloballyAsync();
         //Registering to n-chan test server
         //await services.GetRequiredService<InteractionService>().RegisterCommandsToGuildAsync(990317819059118100);
-        Console.WriteLine("COMMANDS REGISTERED!");
-        Console.WriteLine("INTERACTIONS SET UP - STARTING BOOK OF THE DAY");
-        DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();
+        
+        Console.WriteLine("------------ N-CHAN SETUP COMPLETE, STARTING BOOK OF THE DAY ------------");
+
         botdChannels =
         [
             //By default, the n-chan-peak channel is a book of the day channel.
-            client.GetChannel(1062831763098959982) as IMessageChannel,
+            1062831763098959982,
             //The line below this one sets the general channel in n-chan test as a book of the day channel.
             //client.GetChannel(990317819059118103) as IMessageChannel,
         ];
@@ -84,11 +88,27 @@ public class NChanMain
         _ = BookOfTheDay();
     }
 
+    public static void AddBotdChannel(ulong id){
+        IMessageChannel channel = services.GetRequiredService<DiscordSocketClient>().GetChannel(id) as IMessageChannel;
+        if(channel != null){botdChannels.Add(id);}
+        else { throw new Exception("Channel could not be found."); }
+    }
+    //This function is essentially pointless right now because we don't need to verify anything before
+    //trying to remove the channel, but it stays here anyways.
+    public static void RemoveBotdChannel(ulong id){
+        /*IMessageChannel channel = services.GetRequiredService<DiscordSocketClient>().GetChannel(id) as IMessageChannel;
+        if(channel != null){botdChannels.Remove(id);}
+        else { throw new Exception("Channel could not be found."); }*/
+        botdChannels.Remove(id);
+    }
+
     private async Task BookOfTheDay(){
+        DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();
         while(true){
             if(DateTime.UtcNow.Hour != 10){
                 continue;
             }
+            Console.WriteLine("NCHAN: ATTEMPTING BOOK OF THE DAY...");
             Book book = null;
             while(book == null){
                 int id = new Random().Next(1, 600001);
@@ -101,9 +121,16 @@ public class NChanMain
                 }
             }
             Embed embed = book.CreateEmbed();
-            foreach(IMessageChannel channel in botdChannels){
+            Console.WriteLine("NCHAN: BOOK OF THE DAY RECEIVED. SENDING TO CHANNELS.");
+            foreach(ulong id in botdChannels){
+                IMessageChannel channel = client.GetChannel(id) as IMessageChannel;
+                if(channel == null){
+                    Console.WriteLine("N-CHAN BOOK OF THE DAY ERROR: Channel with ID "+ id + " in list, but not found by n-chan client.");
+                    continue;
+                }
                 await channel.SendMessageAsync("Today's ("+DateTime.Now.Date.ToString("dd/MM/yyyy")+") book of the day is:", embed: embed);
                 await channel.SendMessageAsync(book.CreateRateMessage());
+                Console.WriteLine("NCHAN: SENT TO CHANNEL "+id);
             }
             //Wait an hour
             await Task.Delay(3600000);

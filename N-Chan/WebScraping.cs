@@ -36,22 +36,22 @@ public class WebScraping{
             //"the Set's count is already equal to its capacity on add", which means it shouldn't, but you know,
             //you can never be too careful.
             //I <3 my useless optimizations
-            HashSet<string> elements = new HashSet<string>(node.ParentNode.ChildNodes.Count-1);
-            FillInfoBlockArray(elements, node, node.ParentNode.ChildNodes.Count-1);
+            HashSet<string> elements = new HashSet<string>(node.ParentNode.ChildNodes.Count/2);
+            FillInfoBlockArray(elements, node.ParentNode);
             switch (node.InnerText){
-                case "Parodies:": builder.AddParody(elements);
+                case "Parodies": builder.AddParody(elements);
                     break;
-                case "Characters:": builder.AddCharacters(elements);
+                case "Characters": builder.AddCharacters(elements);
                     break;
-                case "Tags:": builder.AddTags(elements);
+                case "Tags": builder.AddTags(elements);
                     break;
-                case "Artists:": builder.AddArtists(elements);
+                case "Artists": builder.AddArtists(elements);
                     break;
-                case "Groups:": builder.AddGroups(elements);
+                case "Groups": builder.AddGroups(elements);
                     break;
-                case "Languages:": builder.AddLanguages(elements);
+                case "Languages": builder.AddLanguages(elements);
                     break;
-                case "Categories:": builder.AddCategories(elements);
+                case "Category": builder.AddCategories(elements);
                     break;
             }
         }
@@ -65,11 +65,10 @@ public class WebScraping{
         return book;
     }
 
-    private static void FillInfoBlockArray(HashSet<string> infoBlockCategory, HtmlNode htmlReference, int target){
-        htmlReference = htmlReference.NextSibling;
-        int i = 0;
-        for(i = 0; htmlReference!=null && i < target; i++){
-            HtmlNode name = htmlReference.SelectSingleNode("span[@class=\"tag_name\"]");
+    private static void FillInfoBlockArray(HashSet<string> infoBlockCategory, HtmlNode htmlReference){
+        HtmlNodeCollection blocks = htmlReference.SelectNodes("a");
+        foreach(HtmlNode node in blocks){
+            HtmlNode name = node.SelectSingleNode("span[@class=\"tag_name\"]");
             HtmlNodeCollection discard = name.SelectNodes("span");
             if(discard != null){
                 foreach(HtmlNode child in discard){
@@ -77,10 +76,6 @@ public class WebScraping{
                 }
             }
             infoBlockCategory.Add(name.InnerText);
-            htmlReference = htmlReference.NextSibling;
-        }
-        if(htmlReference != null || i < target){
-            throw new Exception("Error on filling an info block array! Index at "+i+" and htmlreference null: "+(htmlReference==null));
         }
     }
 
@@ -90,13 +85,13 @@ public class WebScraping{
         List<(string, int)> result = new List<(string, int)>();
         HtmlNodeCollection infoBlockCategories = doc.DocumentNode.SelectNodes("//div[@class=\"info\"]//li[position()<last()-1]/span");
         foreach(HtmlNode node in infoBlockCategories){
-            if(node.InnerText != "Tags:"){
+            if(node.InnerText != "Tags"){
                 continue;
             }
-            HtmlNode htmlReference = node.NextSibling;
-            while(htmlReference != null){
-                HtmlNode name = htmlReference.SelectSingleNode("span[@class=\"tag_name\"]");
-                HtmlNode count = htmlReference.SelectSingleNode("span[@class=\"tag_count\"]");
+            HtmlNodeCollection blocks = node.ParentNode.SelectNodes("a");
+            foreach(HtmlNode tagNode in blocks){
+                HtmlNode name = tagNode.SelectSingleNode("span[@class=\"tag_name\"]");
+                HtmlNode count = tagNode.SelectSingleNode("span[@class=\"tag_count \"]");
                 HtmlNodeCollection discard = name.SelectNodes("span");
                 if(discard != null){
                     foreach(HtmlNode child in discard){
@@ -104,7 +99,6 @@ public class WebScraping{
                     }
                 }
                 result.Add((name.InnerText, int.Parse(count.InnerText.Replace("K", "000"))));
-                htmlReference = htmlReference.NextSibling;
             }
             break;
         }
