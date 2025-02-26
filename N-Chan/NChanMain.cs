@@ -11,7 +11,7 @@ public class NChanMain
     //which would allow us to send messages directly with its contents.
     //This is because the IMessageChannel class doesn't have a GetHashCode or Equals override,
     //and thus doesn't work for storage in a HashSet.
-    public static HashSet<ulong> botdChannels;
+    private static HashSet<ulong> botdChannels;
     private static IServiceProvider services;
     /*
         Set up and start the actual N-Chan bot and keep it running indefinitely.
@@ -106,6 +106,8 @@ public class NChanMain
         DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();
         while(true){
             if(DateTime.UtcNow.Hour != 10){
+                //Wait an hour
+                await Task.Delay(3600000);
                 continue;
             }
             Console.WriteLine("NCHAN: ATTEMPTING BOOK OF THE DAY...");
