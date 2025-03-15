@@ -12,6 +12,7 @@ public class NChanMain
     //This is because the IMessageChannel class doesn't have a GetHashCode or Equals override,
     //and thus doesn't work for storage in a HashSet.
     private static HashSet<ulong> botdChannels;
+    private bool running = false;
     private static IServiceProvider services;
     /*
         Set up and start the actual N-Chan bot and keep it running indefinitely.
@@ -65,6 +66,9 @@ public class NChanMain
         This effectively serves as post-connection processing for anything that needs a working Discord login.
     */
     private async Task ReadyAsync(){
+        if(running) { return; } //There are occasionally server disconnects where the previous session can't be restored.
+        running = true; //These two lines prevent this method from re-running on reconnecting in those occasions.
+        //Such a thing would create 2 separate book of the day threads, which is bad.
         if(services == null){
             throw new Exception("Services undefined upon attempting to register n-chan commands");
         }
