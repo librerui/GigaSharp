@@ -45,8 +45,10 @@ public class MasterProcess
             };
             while(true){
                 HttpResponseMessage response = await renderClient.GetAsync("Home");
-                Console.WriteLine("Render pinged. Ping success: " + response.IsSuccessStatusCode);
-                await Task.Delay(300000);
+                if(!response.IsSuccessStatusCode){
+                    Console.WriteLine("WARNING: Render ping failed!");
+                }
+                await Task.Delay(60000);
             }
         }
     }
