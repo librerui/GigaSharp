@@ -29,6 +29,12 @@ public class MasterProcess
     //This does little more than kick off the start of all other bots and also keep the ping loop runing forever.
     public static async Task StartBots(){
 
+        // Hooks the ShudownHook method to the ProcessExit event of the application domain.
+        // There's... *several* ways to create a shutdown hook in C#, but a lot of the ones I found
+        // didn't APPEAR to be for .NET (mostly .NET Framework, which is different, and Windows Desktop,
+        // whatever that is), but this one I'm nearly sure is.
+        AppDomain.CurrentDomain.ProcessExit += new EventHandler(ShutdownHook);
+
         //Begin the database setup.
         SetupDatabase();
 
@@ -50,6 +56,33 @@ public class MasterProcess
                 }
                 await Task.Delay(60000);
             }
+        }
+    }
+
+    // Shutdown event handler. Exit event handlers have a timeout (I think, this might actually
+    // only apply to .NET Framework, but to be safe, we'll assume they are anyways), so, we can't
+    // just ping render constantly until we get a response. Instead, we'll ping render once, and then
+    // run another N-Chan, who will hopefully herself ping render a lot and keep the container going.
+    public static void ShutdownHook(object sender, EventArgs e){
+        // We don't actually particularly care about the result of this ping: The app is shutting down anyways.
+        // To avoid making this handler async and potentially causing issues, we don't await this.
+        new HttpClient(){
+            BaseAddress = new Uri(Environment.GetEnvironmentVariable("HOST_URL"))
+        }.GetAsync("Home");
+        // Imma keep it real with you chief, I have *no* idea if this will actually work.
+        // The problem is that docker containers don't necessarily include a shell, and I'm pretty sure ours doesn't.
+        // The information I found online about running commands in a container is abysmal and applies only to when
+        // you, the user, want to run a command inside a container from outside the container. There's basically nothing
+        // about running commands from a process inside the container.
+        // I'm assuming that a shell isn't necessary here since we can just run the dotnet app directly rather than
+        // go through the middleman of the shell, but still.
+        ProcessStartInfo psi = new ProcessStartInfo("dotnet", "/app/GigaSharp.dll");
+        psi.CreateNoWindow = true;
+        Process process = Process.Start(psi);
+        if(process == null){
+            Console.WriteLine("WARNING: ATTEMPTED TO START NEW N-CHAN AND FAILED.");
+        }else{
+            Console.WriteLine("--- NEW N-CHAN PROCESS STARTED ---");
         }
     }
 
