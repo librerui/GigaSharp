@@ -36,13 +36,18 @@ public class YChanFeatures : InteractionModuleBase<SocketInteractionContext>
 
     public static async Task MessageScanner(SocketMessage message){
 
+        Console.WriteLine("Y-CHAN RECEIVED MESSAGE: "+message.Content);
+
         //We first check if this is a message sent by a *user* (as opposed to another bot or a silent message)
         //We then check if this is a message sent in a guild channel (as opposed to a DM)
         if(message is not SocketUserMessage || message.Channel is not SocketTextChannel){
             return;
         }
 
+        Console.WriteLine("Y-CHAN MESSAGE PASSED CHECK");
+
         if(message.Content.ToLower().Contains("grind")){
+            Console.WriteLine("Y-CHAN MESSAGE HAS GRIND IN IT");
             ComponentBuilder builder = new ComponentBuilder();
             builder.WithButton("Sim", "yesgrind", ButtonStyle.Success);
             builder.WithButton("Não", "nogrind", ButtonStyle.Danger);
