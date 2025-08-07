@@ -4,7 +4,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        // Hey reader (which is probably taiko)
+        // Hey reader
         // You're probably looking for the MasterProcess class, not this.
         // Don't mess with this function unless you're really sure of it.
 

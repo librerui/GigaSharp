@@ -69,7 +69,7 @@ public class Book {
         }
         //IMPORTANT: Right now, we're getting every tag's popularity through webscraping.
         //This is obviously bad, but we need it, because the database doesn't provide an alternative.
-        List<(string, int)> tagPopularity = WebScraping.GetBookTagsPopularity(Id);
+        List<(string, int)> tagPopularity = NChanWebScraping.GetBookTagsPopularity(Id);
         tagPopularity.Sort(delegate((string, int) part1, (string, int) part2){
             return part2.Item2.CompareTo(part1.Item2);
         });

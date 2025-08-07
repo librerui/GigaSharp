@@ -2,7 +2,7 @@ using HtmlAgilityPack;
 
 namespace GigaSharp;
 
-public class WebScraping{
+public class NChanWebScraping{
     public async static Task<bool> Ping(){
         try{
             HttpClient nhentaiClient = new HttpClient(){

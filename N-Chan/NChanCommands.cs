@@ -17,7 +17,7 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
 
     [SlashCommand("ping-nhentai", "Ping nhentai.xxx to see if the website is down!")]
     public async Task PingNHentai(){
-        bool result = await WebScraping.Ping();
+        bool result = await NChanWebScraping.Ping();
         if(result){
             await RespondAsync("Master! I think nhentai is up :3");
         }else{
@@ -33,7 +33,7 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
             if(book != null){
                 await RespondAsync(embed: book.CreateEmbed());
             }else{
-                book = WebScraping.GetBookFromWeb(realId);
+                book = NChanWebScraping.GetBookFromWeb(realId);
                 if(book != null){
                     await RespondAsync(embed: book.CreateEmbed());
                 }else{
@@ -55,7 +55,7 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
             if(book != null){
                 await RespondAsync("Master! That book exists :3\nIt's called: "+book.Name);
             }else{
-                book = WebScraping.GetBookFromWeb(realId);
+                book = NChanWebScraping.GetBookFromWeb(realId);
                 if(book != null){
                     await RespondAsync("Master! That book exists :3\nIt's called: "+book.Name);
                 }else{
@@ -79,7 +79,7 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
                     await RespondAsync(embed: book.CreateEmbed());
                     break;
                 }else{
-                    book = WebScraping.GetBookFromWeb(id);
+                    book = NChanWebScraping.GetBookFromWeb(id);
                     if(book != null){
                         await RespondAsync(embed: book.CreateEmbed());
                         break;
@@ -101,7 +101,7 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
             if(book != null){
                 await RespondAsync(book.CreateRateMessage());
             }else{
-                book = WebScraping.GetBookFromWeb(realId);
+                book = NChanWebScraping.GetBookFromWeb(realId);
                 if(book != null){
                     await RespondAsync(book.CreateRateMessage());
                 }else{
@@ -129,7 +129,7 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
                 builder.WithButton("Open book on site", url: "https://nhentai.xxx/g/"+book.Id, style: ButtonStyle.Link);
                 await RespondAsync(embed: new EmbedBuilder().WithTitle(book.Name).WithImageUrl(book.FirstPage).Build(), components: builder.Build());
             }else{
-                book = WebScraping.GetBookFromWeb(realId);
+                book = NChanWebScraping.GetBookFromWeb(realId);
                 if(book != null){
                     builder.WithButton("Go to end page", "readCommand goToEnd "+book.Pages);
                     builder.WithButton("Open book on site", url: "https://nhentai.xxx/g/"+book.Id, style: ButtonStyle.Link);

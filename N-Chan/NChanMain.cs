@@ -120,7 +120,7 @@ public class NChanMain
                 int id = new Random().Next(1, 600001);
                 book = NChanDatabase.GetBook(id);
                 if(book == null){
-                    book = WebScraping.GetBookFromWeb(id);
+                    book = NChanWebScraping.GetBookFromWeb(id);
                     if(book == null){
                         continue;
                     }
@@ -145,7 +145,7 @@ public class NChanMain
 
     private static Task Log(LogMessage msg)
     {
-        Console.WriteLine(msg.ToString());
+        Console.WriteLine("--- N-CHAN LOG ---\n"+msg.ToString());
         return Task.CompletedTask;
     }
 }

@@ -41,6 +41,7 @@ public class MasterProcess
         //Start as many bots as you wish, one after the other.
         //All bots will run indefinitely and cannot be restarted if shut down.
         _ = NChanMain.StartBot();
+        _ = YChanMain.StartBot();
         _ = KnyadministratorMain.StartBot();
 
         var baseuri = Environment.GetEnvironmentVariable("HOST_URL");
@@ -80,9 +81,9 @@ public class MasterProcess
         psi.CreateNoWindow = true;
         Process process = Process.Start(psi);
         if(process == null){
-            Console.WriteLine("WARNING: ATTEMPTED TO START NEW N-CHAN AND FAILED.");
+            Console.WriteLine("WARNING: ATTEMPTED TO START NEW GIGASHARP AND FAILED.");
         }else{
-            Console.WriteLine("--- NEW N-CHAN PROCESS STARTED ---");
+            Console.WriteLine("--- NEW GIGASHARP PROCESS STARTED ---");
         }
     }
 
