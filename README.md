@@ -1,6 +1,6 @@
 # GigaSharp
 
-GigaSharp is a .NET recreation of the old Clube de Gigachad discord bots (N-Chan and, potentially coming in the future under a new name, BS Bot), as well as the new development location of any new bot ideas the group has.
+GigaSharp is a .NET recreation of the old Clube de Gigachad discord bots (N-Chan and BSBot, now under the new identity of Y-Chan), as well as the new development location of any new bot ideas the group has.
 
 These old bots were abandoned due to major structural flaws in their programming that made maintaining their use and adding new features extremely tiresome and often times not worth it. Additionally, the active collaborators in maintaining these bots did not enjoy development in python (the language they were written in): In speculating about the benefits of re-making these bots, the idea of using C# for their recreations was floated, and upon understanding that this was entirely feasible, the group decided to commit to the idea.
 

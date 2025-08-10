@@ -11,7 +11,9 @@ public class YChanMain
 
     public static async Task StartBot(){
         services = new ServiceCollection()
-            .AddSingleton<DiscordSocketClient>()
+            .AddSingleton(x => new DiscordSocketClient(new DiscordSocketConfig{
+                GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent,
+            }))
             .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>().Rest))
             .BuildServiceProvider();
         DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();

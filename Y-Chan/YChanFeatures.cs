@@ -27,31 +27,33 @@ public class YChanFeatures : InteractionModuleBase<SocketInteractionContext>
     public static async Task ButtonHandler(SocketMessageComponent component){
         string[] args = component.Data.CustomId.Split(" ");
         switch(args[0]){
-            case "yesgrind": await component.Channel.SendMessageAsync("*emoji* ai sim? muito bem jovem " + component.User.Username + " isso é o que interessa *emoji* :thumbsup: muito foco no trabalho e nos pés *emoji* :thumbsup:");
+            case "yesgrind": await component.Channel.SendMessageAsync("<:ness_happy:1095829617459335329> ai sim? muito bem jovem " + component.User.Username + " isso é o que interessa <:grindr:1095827706182111342> :thumbsup: muito foco no trabalho e nos pés <:ness_happy:1095829617459335329> :thumbsup:");
+                await component.UpdateAsync(x => x.Components = null);
                 break;
-            case "nogrind": await component.Channel.SendMessageAsync("*emoji* não? estou severamente desapontado sr(a) " + component.User.Username + " vou ter de o(a) prender :raised_hand: *emoji* mãos no teclado e pés onde eu os consiga ver :gun: *emoji* :anger:");
+            case "nogrind": await component.Channel.SendMessageAsync("<:ness_really:1109543571813568652> não? estou severamente desapontado sr(a) " + component.User.Username + " vou ter de o(a) prender :raised_hand: <:grindr:1095827706182111342> mãos no teclado e pés onde eu os consiga ver :gun: <:ness_really:1109543571813568652> :anger:");
+                await component.UpdateAsync(x => x.Components = null);
                 break;
         }
     }
 
     public static async Task MessageScanner(SocketMessage message){
 
-        Console.WriteLine("Y-CHAN RECEIVED MESSAGE: "+message.Content);
-
         //We first check if this is a message sent by a *user* (as opposed to another bot or a silent message)
         //We then check if this is a message sent in a guild channel (as opposed to a DM)
-        if(message is not SocketUserMessage || message.Channel is not SocketTextChannel){
+        SocketUserMessage userMessage = message as SocketUserMessage;
+        if(userMessage == null || message.Author.IsBot){
+            return;
+        }
+        SocketTextChannel msgChannel = userMessage.Channel as SocketTextChannel;
+        if(msgChannel == null){
             return;
         }
 
-        Console.WriteLine("Y-CHAN MESSAGE PASSED CHECK");
-
-        if(message.Content.ToLower().Contains("grind")){
-            Console.WriteLine("Y-CHAN MESSAGE HAS GRIND IN IT");
+        if(userMessage.Content.ToLower().Contains("grind")){
             ComponentBuilder builder = new ComponentBuilder();
             builder.WithButton("Sim", "yesgrind", ButtonStyle.Success);
             builder.WithButton("Não", "nogrind", ButtonStyle.Danger);
-            await message.Channel.SendMessageAsync("*emoji* estou sim departamento do grind *emoji* era para saber se o(a) sr(a) ja grindou hoje", components: builder.Build());
+            await msgChannel.SendMessageAsync("<:ness_call:1095827816441991209> estou sim departamento do grind <:grindr:1095827706182111342> era para saber se o(a) sr(a) ja grindou hoje", components: builder.Build());
         }
     }
 }
