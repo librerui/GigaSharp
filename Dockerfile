@@ -24,5 +24,6 @@ RUN dotnet publish "GigaSharp.csproj" -c $configuration -o /app/publish /p:UseAp
 FROM base AS final
 WORKDIR /app
 COPY sql ./sql
+COPY featureassist ./featureassist
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "GigaSharp.dll"]

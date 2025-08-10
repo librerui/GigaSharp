@@ -1,6 +1,5 @@
 namespace GigaSharp;
 
-using System.Diagnostics;
 using Microsoft.Data.Sqlite;
 
 public class MasterProcess
@@ -29,11 +28,12 @@ public class MasterProcess
     //This does little more than kick off the start of all other bots and also keep the ping loop runing forever.
     public static async Task StartBots(){
 
+        // THE SHUTDOWN HOOK IS NOW USELESS
         // Hooks the ShudownHook method to the ProcessExit event of the application domain.
         // There's... *several* ways to create a shutdown hook in C#, but a lot of the ones I found
         // didn't APPEAR to be for .NET (mostly .NET Framework, which is different, and Windows Desktop,
         // whatever that is), but this one I'm nearly sure is.
-        AppDomain.CurrentDomain.ProcessExit += new EventHandler(ShutdownHook);
+        //AppDomain.CurrentDomain.ProcessExit += new EventHandler(ShutdownHook);
 
         //Begin the database setup.
         SetupDatabase();
@@ -60,6 +60,8 @@ public class MasterProcess
         }
     }
 
+    // THE SHUTDOWN HOOK IS USELESS, KEPT HERE IN CASE IT EVER BECOMES USEFUL AGAIN
+    /*
     // Shutdown event handler. Exit event handlers have a timeout (I think, this might actually
     // only apply to .NET Framework, but to be safe, we'll assume they are anyways), so, we can't
     // just ping render constantly until we get a response. Instead, we'll ping render once, and then
@@ -86,6 +88,7 @@ public class MasterProcess
             Console.WriteLine("--- NEW GIGASHARP PROCESS STARTED ---");
         }
     }
+    */
 
     public static async void SetupDatabase(){
 

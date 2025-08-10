@@ -14,7 +14,6 @@ public class YChanWebAccess
             delaycounter++;
             await Task.Delay(500);
             if(delaycounter >= 5){
-                res.Dispose();
                 return "I'm sowwy! The fun facts API did not respond, master :(";
             }
         }

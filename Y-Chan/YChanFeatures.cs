@@ -1,5 +1,6 @@
 namespace GigaSharp;
 
+using System.Diagnostics;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -49,11 +50,42 @@ public class YChanFeatures : InteractionModuleBase<SocketInteractionContext>
             return;
         }
 
-        if(userMessage.Content.ToLower().Contains("grind")){
+        string text = userMessage.Content.ToLower();
+
+        if(text.Contains("grind")){
             ComponentBuilder builder = new ComponentBuilder();
             builder.WithButton("Sim", "yesgrind", ButtonStyle.Success);
             builder.WithButton("Não", "nogrind", ButtonStyle.Danger);
             await msgChannel.SendMessageAsync("<:ness_call:1095827816441991209> estou sim departamento do grind <:grindr:1095827706182111342> era para saber se o(a) sr(a) ja grindou hoje", components: builder.Build());
         }
+
+        if(text.Contains("gohan") || text.Contains("arroz")){
+            await msgChannel.SendFileAsync("featureassist/gohan"+new Random().Next(1, 7)+".gif");
+        }
+
+        if(text.Contains("massa")){
+            await msgChannel.SendFileAsync("featureassist/massa.gif");
+        }
+        if(text.Contains("batata")){
+            await msgChannel.SendFileAsync("featureassist/batata.gif");
+        }
+        if(text.Contains("legumes")){
+            await msgChannel.SendFileAsync("featureassist/legumes.gif");
+        }
+
+        /*if(text.Contains("inspect")){
+            Console.WriteLine("---- STARTING ANALYSIS ----");
+            Console.WriteLine("Current domain base directory: " + AppDomain.CurrentDomain.BaseDirectory);
+            ProcessStartInfo psi = new ProcessStartInfo("pwd");
+            psi.CreateNoWindow = true;
+            Process process = Process.Start(psi);
+            process.WaitForExit();
+            ProcessStartInfo psi2 = new ProcessStartInfo("ls");
+            psi2.CreateNoWindow = true;
+            Process process2 = Process.Start(psi2);
+            process2.WaitForExit();
+            Console.WriteLine("---- ENDING ANALYSIS ----");
+            await msgChannel.SendMessageAsync("Inspection complete! :3");
+        }*/
     }
 }
