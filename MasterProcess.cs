@@ -24,16 +24,26 @@ public class MasterProcess
             Mode = SqliteOpenMode.ReadWriteCreate,
             ForeignKeys = true
         }.ToString();
+    //This is the global http client used by the whole gigasharp family.
+    //In C#, it's good practice to either use HttpClientFactory to create several short-lived clients
+    //that are later disposed, *or* to use one global singleton long-running client. The initialization
+    //you see basically means that all long-running connections are refreshed every 5 minutes.
+    //This is done in order to respect time-to-live durations, but the measure of 5 minutes is arbitrary,
+    //seeing as this currently isn't relevant and may only become relevant with future bots.
+    private static HttpClient gigaSharpHttpClient = new HttpClient(new SocketsHttpHandler{
+        PooledConnectionLifetime = TimeSpan.FromMinutes(5)
+    });
+    //This is just the method to retrieve our singleton http client.
+    public static HttpClient GetHttpClient(){return gigaSharpHttpClient;}
 
     //This does little more than kick off the start of all other bots and also keep the ping loop runing forever.
     public static async Task StartBots(){
 
-        // THE SHUTDOWN HOOK IS NOW USELESS
         // Hooks the ShudownHook method to the ProcessExit event of the application domain.
         // There's... *several* ways to create a shutdown hook in C#, but a lot of the ones I found
         // didn't APPEAR to be for .NET (mostly .NET Framework, which is different, and Windows Desktop,
         // whatever that is), but this one I'm nearly sure is.
-        //AppDomain.CurrentDomain.ProcessExit += new EventHandler(ShutdownHook);
+        AppDomain.CurrentDomain.ProcessExit += new EventHandler(ShutdownHook);
 
         //Begin the database setup.
         SetupDatabase();
@@ -60,8 +70,6 @@ public class MasterProcess
         }
     }
 
-    // THE SHUTDOWN HOOK IS USELESS, KEPT HERE IN CASE IT EVER BECOMES USEFUL AGAIN
-    /*
     // Shutdown event handler. Exit event handlers have a timeout (I think, this might actually
     // only apply to .NET Framework, but to be safe, we'll assume they are anyways), so, we can't
     // just ping render constantly until we get a response. Instead, we'll ping render once, and then
@@ -72,6 +80,14 @@ public class MasterProcess
         new HttpClient(){
             BaseAddress = new Uri(Environment.GetEnvironmentVariable("HOST_URL"))
         }.GetAsync("Home");
+
+        //Clean up usage of the HTTP client.
+        gigaSharpHttpClient.CancelPendingRequests();
+        gigaSharpHttpClient.Dispose();
+
+        //------- THE FOLLOWING SECTION IS OUTDATED, THE RESTART METHOD IS BROKEN ----------
+        //-------------- KEPT HERE FOR FUTURE REFERENCE -------------
+        
         // Imma keep it real with you chief, I have *no* idea if this will actually work.
         // The problem is that docker containers don't necessarily include a shell, and I'm pretty sure ours doesn't.
         // The information I found online about running commands in a container is abysmal and applies only to when
@@ -79,16 +95,15 @@ public class MasterProcess
         // about running commands from a process inside the container.
         // I'm assuming that a shell isn't necessary here since we can just run the dotnet app directly rather than
         // go through the middleman of the shell, but still.
-        ProcessStartInfo psi = new ProcessStartInfo("dotnet", "/app/GigaSharp.dll");
+        /*ProcessStartInfo psi = new ProcessStartInfo("dotnet", "/app/GigaSharp.dll");
         psi.CreateNoWindow = true;
         Process process = Process.Start(psi);
         if(process == null){
             Console.WriteLine("WARNING: ATTEMPTED TO START NEW GIGASHARP AND FAILED.");
         }else{
             Console.WriteLine("--- NEW GIGASHARP PROCESS STARTED ---");
-        }
+        }*/
     }
-    */
 
     public static async void SetupDatabase(){
 

@@ -43,6 +43,9 @@ public class YChanMain
         };
         client.ButtonExecuted += YChanFeatures.ButtonHandler;
         client.MessageReceived += YChanFeatures.MessageScanner;
+
+        //Load the boafeira font
+        YChanWebAccess.InitializeFont();
     }
 
     private async Task ReadyAsync(){

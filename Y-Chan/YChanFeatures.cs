@@ -1,6 +1,5 @@
 namespace GigaSharp;
 
-using System.Diagnostics;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -18,6 +17,45 @@ public class YChanFeatures : InteractionModuleBase<SocketInteractionContext>
             Console.WriteLine(e.Message);
             Console.WriteLine(e.StackTrace);
             await RespondAsync("I'm sowwy! There was an error processing that request, master :(");
+        }
+    }
+
+    [SlashCommand("lorefact", "Get a random fact about GigaSharp family lore!")]
+    public async Task LoreFact(){
+        try{
+            await RespondAsync(YChanLore.RandomLoreFact());
+        }catch(Exception e){
+            Console.WriteLine(e.Message);
+            Console.WriteLine(e.StackTrace);
+            await RespondAsync("I'm sowwy! There was an error processing that request, master :(");
+        }
+    }
+
+    [SlashCommand("about", "Get some information about y-chan and the wider GigaSharp family!")]
+    public async Task About(){
+        try{
+            await RespondAsync(embed: YChanLore.AboutSection());
+        }catch(Exception e){
+            Console.WriteLine(e.Message);
+            Console.WriteLine(e.StackTrace);
+            await RespondAsync("I'm sowwy! There was an error processing that request, master :(");
+        }
+    }
+
+    [SlashCommand("boafeira", "Get greeted, with a surprise! You can also optionally spoiler this surprise!")]
+    public async Task Boafeira(bool spoilered = false){
+        Stream imgStream = null;
+        await DeferAsync();
+        try{
+            imgStream = await YChanWebAccess.GetBoafeiraImage();
+            await FollowupWithFileAsync(new FileAttachment(imgStream, "boafeira.jpeg", isSpoiler: spoilered));
+        }catch(Exception e){
+            Console.WriteLine(e.Message);
+            Console.WriteLine(e.StackTrace);
+            await FollowupAsync("I'm sowwy! There was an error processing that request, master :(\nDoes your server have some sort of explicit content filter (all community servers have this)?");
+        }
+        if(imgStream != null){
+            imgStream.Dispose();
         }
     }
     

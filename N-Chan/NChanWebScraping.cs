@@ -5,10 +5,7 @@ namespace GigaSharp;
 public class NChanWebScraping{
     public async static Task<bool> Ping(){
         try{
-            HttpClient nhentaiClient = new HttpClient(){
-                BaseAddress = new Uri("https://nhentai.xxx/")
-            };
-            HttpResponseMessage response = await nhentaiClient.GetAsync("home");
+            HttpResponseMessage response = await MasterProcess.GetHttpClient().GetAsync("https://nhentai.xxx/home");
             return response.IsSuccessStatusCode;
         }catch{
             return false;
