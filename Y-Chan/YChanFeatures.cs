@@ -23,23 +23,25 @@ public class YChanFeatures : InteractionModuleBase<SocketInteractionContext>
 
     [SlashCommand("lorefact", "Get a random fact about GigaSharp family lore!")]
     public async Task LoreFact(){
+        await DeferAsync();
         try{
-            await RespondAsync(YChanLore.RandomLoreFact());
+            await FollowupAsync(YChanLore.RandomLoreFact());
         }catch(Exception e){
             Console.WriteLine(e.Message);
             Console.WriteLine(e.StackTrace);
-            await RespondAsync("I'm sowwy! There was an error processing that request, master :(");
+            await FollowupAsync("I'm sowwy! There was an error processing that request, master :(");
         }
     }
 
     [SlashCommand("about", "Get some information about y-chan and the wider GigaSharp family!")]
     public async Task About(){
+        await DeferAsync();
         try{
-            await RespondAsync(embed: YChanLore.AboutSection());
+            await FollowupAsync(embed: YChanLore.AboutSection());
         }catch(Exception e){
             Console.WriteLine(e.Message);
             Console.WriteLine(e.StackTrace);
-            await RespondAsync("I'm sowwy! There was an error processing that request, master :(");
+            await FollowupAsync("I'm sowwy! There was an error processing that request, master :(");
         }
     }
 
