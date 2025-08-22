@@ -15,14 +15,16 @@ public class NChanWebScraping{
         HtmlDocument doc = new HtmlWeb().Load("https://nhentai.xxx/g/"+id);
         if(doc == null) { return null; }
         if(CheckIf404(doc)) { return null; }
-        HtmlDocument firstPage = new HtmlWeb().Load("https://nhentai.xxx/g/"+id+@"/1");
-        if(firstPage == null) { return null; }
-
+        string firstPage = GetBookPage(id, 1);
+        if(firstPage == null){
+            return null;
+        }
+        
         HtmlNode infoBlock = doc.DocumentNode.SelectSingleNode("//div[@class=\"info\"]");
         Book.BookBuilder builder = new Book.BookBuilder().AddId(id)
             .AddDoc(doc)
             .AddName(infoBlock.Element("h1").InnerText)
-            .AddFirstPage(firstPage.DocumentNode.SelectSingleNode("//a[@class=\"fw_img\"]/img").Attributes["data-src"].Value);
+            .AddFirstPage(firstPage);
         
         HtmlNodeCollection infoBlockCategories = infoBlock.SelectNodes("//li[position()<last()-1]/span");
         foreach(HtmlNode node in infoBlockCategories){
@@ -60,6 +62,12 @@ public class NChanWebScraping{
         //reason can't be inserted, it's not that bad to webscrape it.
         _ = NChanDatabase.InsertBook(book);
         return book;
+    }
+
+    public static string GetBookPage(int id, int page){
+        HtmlDocument pageDoc = new HtmlWeb().Load("https://nhentai.xxx/g/"+id+@"/"+page);
+        if(pageDoc == null) { return null; }
+        return pageDoc.DocumentNode.SelectSingleNode("//a[@class=\"fw_img\"]/img").Attributes["data-src"].Value;
     }
 
     private static void FillInfoBlockArray(HashSet<string> infoBlockCategory, HtmlNode htmlReference){

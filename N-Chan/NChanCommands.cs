@@ -120,6 +120,7 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
         try{
             int realId = int.Parse(id);
             ComponentBuilder builder = new ComponentBuilder();
+            builder.WithButton("Reload page", "readCommand reload "+realId);
             builder.WithButton("Previous page", "readCommand prev");
             builder.WithButton("Next page", "readCommand next");
             builder.WithButton("Go to start page", "readCommand goToStart");
@@ -165,6 +166,15 @@ public class NChanCommands : InteractionModuleBase<SocketInteractionContext>
                 int slashBeforeFilename = url.LastIndexOf("/") + 1;
                 int pageNumberDigitCount = filenameDot - slashBeforeFilename;
                 int pageNumber = int.Parse(url.Substring(slashBeforeFilename, pageNumberDigitCount));
+                if(args[1] == "reload"){
+                    url = NChanWebScraping.GetBookPage(int.Parse(args[2]), pageNumber);
+                    if(url == null){
+                        await component.Channel.SendMessageAsync("Master! There was an error reloading that page :(");
+                        return;
+                    }
+                    await component.UpdateAsync(x => x.Embed = new EmbedBuilder().WithTitle(embed.Title).WithImageUrl(url).Build());
+                    return;
+                }
                 url = url.Remove(slashBeforeFilename, pageNumberDigitCount);
                 switch(args[1]){
                     case "prev": pageNumber--;

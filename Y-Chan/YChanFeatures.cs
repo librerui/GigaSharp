@@ -11,12 +11,13 @@ public class YChanFeatures : InteractionModuleBase<SocketInteractionContext>
 
     [SlashCommand("funfact", "Get a random fun fact!")]
     public async Task FunFact(){
+        await DeferAsync();
         try{
-            await RespondAsync(await YChanWebAccess.GetFunFact());
+            await FollowupAsync(await YChanWebAccess.GetFunFact());
         }catch(Exception e){
             Console.WriteLine(e.Message);
             Console.WriteLine(e.StackTrace);
-            await RespondAsync("I'm sowwy! There was an error processing that request, master :(");
+            await FollowupAsync("I'm sowwy! There was an error processing that request, master :(");
         }
     }
 
