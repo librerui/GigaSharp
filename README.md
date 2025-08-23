@@ -23,3 +23,7 @@ Basic, stable database added (but very rudimentary and not without its problems 
 * **2025-02-20: Version 1.0, commit b74aec0**
 
 First stable, long-running, deployable version of the project. All basic n-chan functionalities finished, functional, and tested. Book of the day and book rating systems added. Commands made global, loose local commands deleted. It may also be possible to use n-chan commands in DMs if the user installs the application into their account.
+
+* **2025-08-23: Version 2.0, commit cda4513**
+
+Several minor changes to n-chan. First stable, long-running, deployable version of Y-Chan, the renewal of the old BSBot project, with all planned functionalities added (fun facts, lore facts, boafeira, keyword replies, about section). Knyadministrator bot made official. All commands (except knyadministrator commands) now use deferring and follow-ups rather than a single response to avoid complications with discord's 3 second interaction time limit.
