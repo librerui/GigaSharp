@@ -6,7 +6,9 @@ using Discord.WebSocket;
 
 public class YChanMain
 {
-    private bool running = false;
+    private static HashSet<ulong> dailyGreetingChannels;
+    public static bool Running{get; private set;}
+    public static bool spoilerDailyGreeting = true;
     private static IServiceProvider services;
 
     public static async Task StartBot(){
@@ -49,18 +51,53 @@ public class YChanMain
     }
 
     private async Task ReadyAsync(){
-        if(running) { return; } //There are occasionally server disconnects where the previous session can't be restored.
-        running = true; //These two lines prevent this method from re-running on reconnecting in those occasions.
+        if(Running) { return; }
+        
         if(services == null){
             throw new Exception("Services undefined upon attempting to register y-chan commands");
         }
         //Global registry (MAY TAKE UP TO AN HOUR TO TAKE EFFECT)
-        //COMMENT THIS LINE OUT WHEN TESTING OUT NEW COMMANDS - BE CAREFUL ABOUT DUPLICATE COMMANDS GLOBALLY AND ON GUILDS
         await services.GetRequiredService<InteractionService>().RegisterCommandsGloballyAsync();
-        //Registering to the test server
-        //await services.GetRequiredService<InteractionService>().RegisterCommandsToGuildAsync(990317819059118100);
+
+        dailyGreetingChannels =
+        [
+            //By default, the bot-chat channel gets a daily greeting.
+            1062831579514290306
+        ];
         
+        Running = true;
+
         Console.WriteLine("------------ Y-CHAN SETUP COMPLETE ------------");
+    }
+
+    public static void AddGreetingChannel(ulong id){
+        IMessageChannel channel = services.GetRequiredService<DiscordSocketClient>().GetChannel(id) as IMessageChannel;
+        if(channel != null){dailyGreetingChannels.Add(id);}
+        else { throw new Exception("Channel could not be found."); }
+    }
+    //This function is essentially pointless right now because we don't need to verify anything before
+    //trying to remove the channel, but it stays here anyways.
+    public static void RemoveGreetingChannel(ulong id){
+        dailyGreetingChannels.Remove(id);
+    }
+
+    public static async Task DailyGreeting(){
+        DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();
+        Console.WriteLine("YCHAN: ATTEMPTING DAILY GREETING...");
+        string funfact = await YChanWebAccess.GetFunFact();
+        string lorefact = YChanLore.RandomLoreFact();
+        Stream boafeiraImg = await YChanWebAccess.GetBoafeiraImage();
+        Console.WriteLine("YCHAN: GREETING READY. SENDING TO CHANNELS.");
+        foreach(ulong id in dailyGreetingChannels){
+            IMessageChannel channel = client.GetChannel(id) as IMessageChannel;
+            if(channel == null){
+                Console.WriteLine("Y-CHAN GREETING ERROR: Channel with ID "+ id + " in list, but not found by y-chan client.");
+                continue;
+            }
+            await channel.SendFileAsync(new FileAttachment(boafeiraImg, "boafeira.jpeg", isSpoiler: spoilerDailyGreeting));
+            await channel.SendMessageAsync("good morning knyigachads!!!\nToday's fun fact is: "+funfact+"\nToday's lore fact is: "+lorefact);
+            Console.WriteLine("YCHAN: SENT TO CHANNEL "+id);
+        }
     }
 
     private static Task Log(LogMessage msg)

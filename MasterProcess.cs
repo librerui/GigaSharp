@@ -54,6 +54,9 @@ public class MasterProcess
         _ = YChanMain.StartBot();
         _ = KnyadministratorMain.StartBot();
 
+        // Begin running the daily events.
+        _ = DailyEventsTimer();
+
         var baseuri = Environment.GetEnvironmentVariable("HOST_URL");
         if(baseuri != null){
             //Infinite 5-minute loop that performs a GET request to the render URL.
@@ -119,5 +122,22 @@ public class MasterProcess
         conn.Close();
         databaseReady = true;
         Console.WriteLine("---------- DATABASE IS READY ----------");
+    }
+
+    public static async Task DailyEventsTimer(){
+        while(!NChanMain.Running || !YChanMain.Running){
+            await Task.Delay(1000);
+        }
+        while(true){
+            if(DateTime.UtcNow.Hour != 10){
+                //Wait an hour
+                await Task.Delay(3600000);
+                continue;
+            }
+            _ = NChanMain.BookOfTheDay();
+            _ = YChanMain.DailyGreeting();
+            //Wait an hour
+            await Task.Delay(3600000);
+        }
     }
 }

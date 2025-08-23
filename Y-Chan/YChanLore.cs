@@ -27,8 +27,10 @@ public class YChanLore
     };
 
     public static readonly string[] r34queries = {
-        "vegeta cuntboy",
-        "vegeta goku 2boys"
+        "vegeta cuntboy male_only -ai_generated",
+        "vegeta goku yaoi -ai_generated",
+        "jiren male_only -ai_generated",
+        "noriaki_kakyoin horse -ai_generated"
     };
 
     public static string RandomLoreFact(){

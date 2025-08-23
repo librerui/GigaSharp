@@ -12,7 +12,7 @@ public class NChanMain
     //This is because the IMessageChannel class doesn't have a GetHashCode or Equals override,
     //and thus doesn't work for storage in a HashSet.
     private static HashSet<ulong> botdChannels;
-    private bool running = false;
+    public static bool Running{get; private set;}
     private static IServiceProvider services;
     /*
         Set up and start the actual N-Chan bot and keep it running indefinitely.
@@ -66,8 +66,9 @@ public class NChanMain
         This effectively serves as post-connection processing for anything that needs a working Discord login.
     */
     private async Task ReadyAsync(){
-        if(running) { return; } //There are occasionally server disconnects where the previous session can't be restored.
-        running = true; //These two lines prevent this method from re-running on reconnecting in those occasions.
+        if(Running) { return; } //There are occasionally server disconnects where the previous session can't be restored.
+        //This check prevents this method from re-running on reconnecting in those occasions.
+
         //Such a thing would create 2 separate book of the day threads, which is bad.
         if(services == null){
             throw new Exception("Services undefined upon attempting to register n-chan commands");
@@ -77,8 +78,6 @@ public class NChanMain
         await services.GetRequiredService<InteractionService>().RegisterCommandsGloballyAsync();
         //Registering to n-chan test server
         //await services.GetRequiredService<InteractionService>().RegisterCommandsToGuildAsync(990317819059118100);
-        
-        Console.WriteLine("------------ N-CHAN SETUP COMPLETE, STARTING BOOK OF THE DAY ------------");
 
         botdChannels =
         [
@@ -88,8 +87,9 @@ public class NChanMain
             //client.GetChannel(990317819059118103) as IMessageChannel,
         ];
         
-        //Start the book of the day and run indefinitely
-        _ = BookOfTheDay();
+        Running = true; // All done.
+
+        Console.WriteLine("------------ N-CHAN SETUP COMPLETE ------------");
     }
 
     public static void AddBotdChannel(ulong id){
@@ -106,40 +106,31 @@ public class NChanMain
         botdChannels.Remove(id);
     }
 
-    private async Task BookOfTheDay(){
+    public static async Task BookOfTheDay(){
         DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();
-        while(true){
-            if(DateTime.UtcNow.Hour != 10){
-                //Wait an hour
-                await Task.Delay(3600000);
-                continue;
-            }
-            Console.WriteLine("NCHAN: ATTEMPTING BOOK OF THE DAY...");
-            Book book = null;
-            while(book == null){
-                int id = new Random().Next(1, 600001);
-                book = NChanDatabase.GetBook(id);
+        Console.WriteLine("NCHAN: ATTEMPTING BOOK OF THE DAY...");
+        Book book = null;
+        while(book == null){
+            int id = new Random().Next(1, 600001);
+            book = NChanDatabase.GetBook(id);
+            if(book == null){
+                book = NChanWebScraping.GetBookFromWeb(id);
                 if(book == null){
-                    book = NChanWebScraping.GetBookFromWeb(id);
-                    if(book == null){
-                        continue;
-                    }
-                }
-            }
-            Embed embed = book.CreateEmbed();
-            Console.WriteLine("NCHAN: BOOK OF THE DAY RECEIVED. SENDING TO CHANNELS.");
-            foreach(ulong id in botdChannels){
-                IMessageChannel channel = client.GetChannel(id) as IMessageChannel;
-                if(channel == null){
-                    Console.WriteLine("N-CHAN BOOK OF THE DAY ERROR: Channel with ID "+ id + " in list, but not found by n-chan client.");
                     continue;
                 }
-                await channel.SendMessageAsync("Today's ("+DateTime.Now.Date.ToString("dd/MM/yyyy")+") book of the day is:", embed: embed);
-                await channel.SendMessageAsync(book.CreateRateMessage());
-                Console.WriteLine("NCHAN: SENT TO CHANNEL "+id);
             }
-            //Wait an hour
-            await Task.Delay(3600000);
+        }
+        Embed embed = book.CreateEmbed();
+        Console.WriteLine("NCHAN: BOOK OF THE DAY RECEIVED. SENDING TO CHANNELS.");
+        foreach(ulong id in botdChannels){
+            IMessageChannel channel = client.GetChannel(id) as IMessageChannel;
+            if(channel == null){
+                Console.WriteLine("N-CHAN BOOK OF THE DAY ERROR: Channel with ID "+ id + " in list, but not found by n-chan client.");
+                continue;
+            }
+            await channel.SendMessageAsync("Today's ("+DateTime.Now.Date.ToString("dd/MM/yyyy")+") book of the day is:", embed: embed);
+            await channel.SendMessageAsync(book.CreateRateMessage());
+            Console.WriteLine("NCHAN: SENT TO CHANNEL "+id);
         }
     }
 
