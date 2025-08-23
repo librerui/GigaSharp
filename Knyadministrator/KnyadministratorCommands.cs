@@ -75,4 +75,16 @@ public class KnyadministratorCommands : InteractionModuleBase<SocketInteractionC
             await RespondAsync("Apologies, but something went wrong, sir! :saluting_face:");
         }
     }
+
+    [SlashCommand("shutdown", "Turn off the bots!")]
+    public async Task Shutdown(){
+        try{
+            await RespondAsync("Shutting down, sir!\nIt was an honor! :saluting_face:");
+            Program.Shutdown();
+        }catch(Exception e){
+            Console.WriteLine(e.Message);
+            Console.WriteLine(e.StackTrace);
+            await RespondAsync("Apologies, but something went wrong, sir! :saluting_face:");
+        }
+    }
 }

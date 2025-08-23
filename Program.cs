@@ -42,4 +42,8 @@ public class Program
         //DO NOT PLACE CODE AFTER THIS LINE
         app.Run();
     }
+
+    public static void Shutdown(){
+        Environment.Exit(0);
+    }
 }

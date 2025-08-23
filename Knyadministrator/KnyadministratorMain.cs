@@ -63,10 +63,7 @@ public class KnyadministratorMain {
             throw new Exception("Services undefined upon attempting to register knyadministrator commands");
         }
         //Global registry (MAY TAKE UP TO AN HOUR TO TAKE EFFECT)
-        //COMMENT THIS LINE OUT WHEN TESTING OUT NEW COMMANDS - BE CAREFUL ABOUT DUPLICATE COMMANDS GLOBALLY AND ON GUILDS
-        //await services.GetRequiredService<InteractionService>().RegisterCommandsGloballyAsync();
-        //Registering to n-chan test server
-        //await services.GetRequiredService<InteractionService>().RegisterCommandsToGuildAsync(990317819059118100);
+        await services.GetRequiredService<InteractionService>().RegisterCommandsGloballyAsync();
         
         Console.WriteLine("------------ KNYADMINISTRATOR SETUP COMPLETE ------------");
     }

@@ -1,5 +1,6 @@
 namespace GigaSharp;
 
+using System.Net.Sockets;
 using Microsoft.Data.Sqlite;
 
 public class MasterProcess
