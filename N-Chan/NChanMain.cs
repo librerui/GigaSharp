@@ -139,4 +139,10 @@ public class NChanMain
         Console.WriteLine("--- N-CHAN LOG ---\n"+msg.ToString());
         return Task.CompletedTask;
     }
+
+    public static async Task Shutdown(){
+        DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();
+        await client.LogoutAsync();
+        await client.StopAsync();
+    }
 }

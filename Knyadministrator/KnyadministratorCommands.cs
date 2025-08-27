@@ -80,7 +80,7 @@ public class KnyadministratorCommands : InteractionModuleBase<SocketInteractionC
     public async Task Shutdown(){
         try{
             await RespondAsync("Shutting down, sir!\nIt was an honor! :saluting_face:");
-            Program.Shutdown();
+            await MasterProcess.GracefulShutdown();
         }catch(Exception e){
             Console.WriteLine(e.Message);
             Console.WriteLine(e.StackTrace);

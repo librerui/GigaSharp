@@ -1,5 +1,6 @@
 namespace GigaSharp;
 
+using System.Net;
 using HtmlAgilityPack;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
@@ -22,16 +23,8 @@ public class YChanWebAccess
 
     public static async Task<string> GetFunFact(){
         //https://thefact.space/random
-        int delaycounter = 0;
-        Task<HttpResponseMessage> res = MasterProcess.GetHttpClient().GetAsync(Environment.GetEnvironmentVariable("FUNFACTS_API"));
-        while(!res.IsCompleted){
-            delaycounter++;
-            await Task.Delay(500);
-            if(delaycounter >= 5){
-                return "I'm sowwy! The fun facts API did not respond, master :(";
-            }
-        }
-        string content = await res.Result.Content.ReadAsStringAsync();
+        HttpResponseMessage res = await MasterProcess.GetHttpClient().GetAsync(Environment.GetEnvironmentVariable("FUNFACTS_API"));
+        string content = await res.Content.ReadAsStringAsync();
         int factstart = content.IndexOf(':', content.IndexOf(':')+1)+2;
         return content.Substring(factstart, content.IndexOf("\",\"source\":")-factstart);
     }
