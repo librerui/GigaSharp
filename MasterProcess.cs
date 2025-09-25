@@ -123,14 +123,19 @@ public class MasterProcess
                 BaseAddress = new Uri(baseuri)
             };
             while(true){
-                //we also call the fun facts api because it's also hosted on render and we want to keep
-                //it running
-                await new HttpClient().GetAsync(Environment.GetEnvironmentVariable("FUNFACTS_API"));
-                HttpResponseMessage response = await renderClient.GetAsync("Home");
-                if(!response.IsSuccessStatusCode){
-                    Console.WriteLine("WARNING: Render ping failed!");
+                try{
+                    //we also call the fun facts api because it's also hosted on render and we want to keep
+                    //it running
+                    await new HttpClient().GetAsync(Environment.GetEnvironmentVariable("FUNFACTS_API"));
+                    HttpResponseMessage response = await renderClient.GetAsync("Home");
+                    if(!response.IsSuccessStatusCode){
+                        Console.WriteLine("WARNING: Render ping failed!");
+                    }
+                    await Task.Delay(60000);
+                }catch(Exception){
+                    Console.WriteLine("--- ERROR ON RENDER PINGS, TRYING AGAIN... ---");
+                    await Task.Delay(1000);
                 }
-                await Task.Delay(60000);
             }
         }
     }

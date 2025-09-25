@@ -23,7 +23,8 @@ public class YChanLore
         "Don't think too hard about the fact that we are the GigaSharp *family* and yet me and n-chan are girlfriends :3",
         "N-Chan gets her hentais from nhentai.xxx, but she actually used to get them from a different nhentai implementation: nhentai.to! But it sucked, so, she changed it.",
         "We're hosted on a platform called \"Render\"! But you probably shouldn't tell them about that... Our creators are abusing their free plan to hell and back, and we don't want the \"goorm incident\" to repeat itself...",
-        "When our creators got banned from goorm, they, being kinda stupid, learned the hard way the importance of frequent backups. RIP dating system... We miss you, and the weeks our creators lost developing you, every single day :("
+        "When our creators got banned from goorm, they, being kinda stupid, learned the hard way the importance of frequent backups. RIP dating system... We miss you, and the weeks our creators lost developing you, every single day :(",
+        "The platform we used to be hosted on, goorm, is fucking dead! They reached end of life on 2025-10-30, right at the gates of halloween! Our creators' best guess as to why is because some spooky lesbians must have given those homophobes a heart attack with surprise yuri!"
     };
 
     public static readonly string[] r34queries = {
