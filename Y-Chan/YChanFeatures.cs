@@ -9,6 +9,8 @@ using Discord.WebSocket;
 public class YChanFeatures : InteractionModuleBase<SocketInteractionContext>
 {
 
+    private static bool shrimpAnnouncement = true;
+
     [SlashCommand("funfact", "Get a random fun fact!")]
     public async Task FunFact(){
         await DeferAsync();
@@ -112,6 +114,20 @@ public class YChanFeatures : InteractionModuleBase<SocketInteractionContext>
         }
         if(text.Contains("legumes")){
             await msgChannel.SendFileAsync("featureassist/legumes.gif");
+        }
+
+        if(text.Contains("shrimp") || text.Contains("camarao") || text.Contains("camarão") || text.Contains("prawn") || text.Contains("krill")){
+            if(userMessage.Author.Id == 441501739984748546 && text.Contains("shrimptoggle")){
+                shrimpAnnouncement = !shrimpAnnouncement;
+                if(shrimpAnnouncement){
+                    await msgChannel.SendMessageAsync("Shrimp announcements turned on!");
+                }else{
+                    await msgChannel.SendMessageAsync("Shrimp announcements turned off!");
+                }
+            }
+            if(shrimpAnnouncement){
+                await msgChannel.SendMessageAsync(msgChannel.Guild.Roles.First<SocketRole>(x => x.Name == "Shrimp").Mention + " People are talking about SHRIMP IN CHAT!!! :shrimp:");
+            }
         }
 
         /*if(text.Contains("inspect")){
